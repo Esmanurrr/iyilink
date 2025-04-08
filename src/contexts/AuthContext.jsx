@@ -10,17 +10,16 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function signup(email) {
-    // Mock signup işlevi
+  function signup(email, password, name, surname) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const user = {
+        const mockUser = {
+          uid: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           email,
-          uid: Math.random().toString(36).substring(2, 15),
+          displayName: `${name} ${surname}`,
         };
-        localStorage.setItem("user", JSON.stringify(user));
-        setCurrentUser(user);
-        resolve(user);
+        setCurrentUser(mockUser);
+        resolve(mockUser);
       }, 800);
     });
   }

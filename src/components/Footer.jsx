@@ -4,50 +4,84 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white py-8 border-t dark:bg-gray-800 dark:border-gray-700">
-      <div className="container mx-auto px-4">
+    <footer
+      style={{
+        backgroundColor: "var(--color-neutral-light)",
+        borderTop: "1px solid var(--color-border)",
+        boxShadow: "0 -2px 8px var(--color-shadow)",
+      }}
+    >
+      <div className="container mx-auto px-4 py-8">
         <div className="md:flex md:justify-between">
           <div className="mb-6 md:mb-0">
             <Link to="/" className="flex items-center">
-              <span className="self-center text-2xl font-semibold whitespace-nowrap text-blue-600 dark:text-blue-400">
+              <span
+                className="self-center text-2xl font-semibold transition-all hover:opacity-90"
+                style={{ color: "var(--color-primary)" }}
+              >
                 İyiLink
               </span>
             </Link>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p
+              className="mt-2 text-sm"
+              style={{ color: "var(--color-light-text)" }}
+            >
               Tüm bağlantılarınız için tek link
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:gap-16">
             <div>
-              <h2 className="mb-4 text-sm font-semibold uppercase text-gray-900 dark:text-white">
+              <h2
+                className="mb-4 text-sm font-semibold uppercase"
+                style={{ color: "var(--color-dark-text)" }}
+              >
                 Kaynaklar
               </h2>
-              <ul className="text-gray-600 dark:text-gray-400">
+              <ul style={{ color: "var(--color-light-text)" }}>
                 <li className="mb-2">
-                  <Link to="/about" className="hover:underline">
+                  <Link
+                    to="/about"
+                    className="hover:underline transition-all hover:text-primary"
+                    style={{ color: "var(--color-link)" }}
+                  >
                     Hakkımızda
                   </Link>
                 </li>
                 <li>
-                  <Link to="/help" className="hover:underline">
+                  <Link
+                    to="/help"
+                    className="hover:underline transition-all hover:text-primary"
+                    style={{ color: "var(--color-link)" }}
+                  >
                     Yardım
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h2 className="mb-4 text-sm font-semibold uppercase text-gray-900 dark:text-white">
+              <h2
+                className="mb-4 text-sm font-semibold uppercase"
+                style={{ color: "var(--color-dark-text)" }}
+              >
                 İletişim
               </h2>
-              <ul className="text-gray-600 dark:text-gray-400">
+              <ul style={{ color: "var(--color-light-text)" }}>
                 <li className="mb-2">
-                  <Link to="/contact" className="hover:underline">
+                  <Link
+                    to="/contact"
+                    className="hover:underline transition-all hover:text-primary"
+                    style={{ color: "var(--color-link)" }}
+                  >
                     İletişim
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="hover:underline">
+                  <Link
+                    to="/terms"
+                    className="hover:underline transition-all hover:text-primary"
+                    style={{ color: "var(--color-link)" }}
+                  >
                     Kullanım Şartları
                   </Link>
                 </li>
@@ -56,11 +90,19 @@ export default function Footer() {
           </div>
         </div>
 
-        <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700" />
+        <hr className="my-6" style={{ borderColor: "var(--color-border)" }} />
+
         <div className="sm:flex sm:items-center sm:justify-between">
-          <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+          <span
+            className="text-sm sm:text-center"
+            style={{ color: "var(--color-light-text)" }}
+          >
             © {currentYear}{" "}
-            <Link to="/" className="hover:underline">
+            <Link
+              to="/"
+              className="hover:underline"
+              style={{ color: "var(--color-link)" }}
+            >
               İyiLink
             </Link>
             . Tüm hakları saklıdır.
@@ -68,7 +110,8 @@ export default function Footer() {
           <div className="flex mt-4 space-x-6 sm:justify-center sm:mt-0">
             <a
               href="#"
-              className="text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              className="hover:opacity-80 transition-all"
+              style={{ color: "var(--color-primary)" }}
             >
               <svg
                 className="w-5 h-5"
@@ -85,7 +128,8 @@ export default function Footer() {
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              className="hover:opacity-80 transition-all"
+              style={{ color: "var(--color-primary)" }}
             >
               <svg
                 className="w-5 h-5"
@@ -98,7 +142,8 @@ export default function Footer() {
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              className="hover:opacity-80 transition-all"
+              style={{ color: "var(--color-primary)" }}
             >
               <svg
                 className="w-5 h-5"

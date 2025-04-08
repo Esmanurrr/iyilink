@@ -4,7 +4,13 @@ import Footer from "./Footer";
 
 export default function Layout() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundColor: "var(--color-background)",
+        color: "var(--color-dark-text)",
+      }}
+    >
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Outlet />

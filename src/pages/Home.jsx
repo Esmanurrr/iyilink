@@ -5,14 +5,23 @@ export default function Home() {
   const { currentUser } = useAuth();
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900">
+    <div style={{ backgroundColor: "#FFFFFF" }}>
       {/* Hero */}
-      <section className="py-16 md:py-24">
+      <section
+        className="py-16 md:py-24"
+        style={{ backgroundColor: "#FFFFFF" }}
+      >
         <div className="container mx-auto text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-800 dark:text-white">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            style={{ color: "var(--color-dark-text)" }}
+          >
             Tüm Bağlantılarınız İçin Tek Yer
           </h1>
-          <p className="text-xl md:text-2xl mb-10 text-gray-600 dark:text-gray-300">
+          <p
+            className="text-xl md:text-2xl mb-10"
+            style={{ color: "var(--color-light-text)" }}
+          >
             Sosyal medya hesaplarınızı, websitelerinizi ve daha fazlasını tek
             bir bağlantıda toplayın.
           </p>
@@ -20,7 +29,11 @@ export default function Home() {
             {currentUser ? (
               <Link
                 to="/dashboard"
-                className="px-8 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
+                className="px-8 py-3 font-medium rounded-lg transition-colors"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "white",
+                }}
               >
                 Dashboard'a Git
               </Link>
@@ -28,13 +41,22 @@ export default function Home() {
               <>
                 <Link
                   to="/signup"
-                  className="px-8 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-8 py-3 font-medium rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: "var(--color-primary)",
+                    color: "white",
+                  }}
                 >
                   Ücretsiz Kayıt Ol
                 </Link>
                 <Link
                   to="/login"
-                  className="px-8 py-3 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors border border-gray-300 dark:bg-gray-800 dark:text-blue-400 dark:border-gray-700 dark:hover:bg-gray-700"
+                  className="px-8 py-3 font-medium rounded-lg transition-colors border"
+                  style={{
+                    backgroundColor: "var(--color-neutral-light)",
+                    color: "var(--color-primary)",
+                    borderColor: "var(--color-border)",
+                  }}
                 >
                   Giriş Yap
                 </Link>
@@ -45,18 +67,33 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-white dark:bg-gray-800">
+      <section
+        className="py-16"
+        style={{ backgroundColor: "var(--color-card-bg)" }}
+      >
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+          <h2
+            className="text-3xl font-bold text-center mb-12"
+            style={{ color: "var(--color-dark-text)" }}
+          >
             Özellikler
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm dark:bg-gray-700">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 dark:bg-blue-900">
+            <div
+              className="p-6 rounded-lg shadow-sm"
+              style={{ backgroundColor: "var(--color-neutral-light)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                style={{
+                  backgroundColor: "var(--color-secondary)",
+                  color: "var(--color-primary)",
+                }}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-600 dark:text-blue-300"
+                  className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -69,20 +106,32 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
+              <h3
+                className="text-xl font-semibold mb-2"
+                style={{ color: "var(--color-dark-text)" }}
+              >
                 Kolay Kullanım
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p style={{ color: "var(--color-light-text)" }}>
                 Dakikalar içinde kayıt olun ve bağlantılarınızı tek bir yerde
                 toplamaya başlayın.
               </p>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm dark:bg-gray-700">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 dark:bg-blue-900">
+            <div
+              className="p-6 rounded-lg shadow-sm"
+              style={{ backgroundColor: "var(--color-neutral-light)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                style={{
+                  backgroundColor: "var(--color-secondary)",
+                  color: "var(--color-primary)",
+                }}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-600 dark:text-blue-300"
+                  className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -95,20 +144,32 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
+              <h3
+                className="text-xl font-semibold mb-2"
+                style={{ color: "var(--color-dark-text)" }}
+              >
                 Özelleştirilebilir
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p style={{ color: "var(--color-light-text)" }}>
                 Profilinizi kendi tarzınıza göre özelleştirin ve benzersiz bir
                 görünüm oluşturun.
               </p>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm dark:bg-gray-700">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 dark:bg-blue-900">
+            <div
+              className="p-6 rounded-lg shadow-sm"
+              style={{ backgroundColor: "var(--color-neutral-light)" }}
+            >
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                style={{
+                  backgroundColor: "var(--color-secondary)",
+                  color: "var(--color-primary)",
+                }}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-600 dark:text-blue-300"
+                  className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -121,10 +182,13 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
+              <h3
+                className="text-xl font-semibold mb-2"
+                style={{ color: "var(--color-dark-text)" }}
+              >
                 Analitikler
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p style={{ color: "var(--color-light-text)" }}>
                 Ziyaretçi istatistiklerinizi takip edin ve hangilerinin en
                 popüler olduğunu görün.
               </p>
@@ -134,17 +198,24 @@ export default function Home() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-blue-600 text-white">
+      <section
+        className="py-16 text-white"
+        style={{ backgroundColor: "var(--color-primary)" }}
+      >
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="text-3xl font-bold mb-6">Bugün Başlayın</h2>
-          <p className="text-xl mb-8 text-blue-100">
+          <p className="text-xl mb-8 opacity-90">
             İyiLink ile tüm bağlantılarınızı tek bir URL altında paylaşmaya
             başlayın.
           </p>
           {!currentUser && (
             <Link
               to="/signup"
-              className="px-8 py-3 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors"
+              className="px-8 py-3 font-medium rounded-lg transition-colors"
+              style={{
+                backgroundColor: "white",
+                color: "var(--color-primary)",
+              }}
             >
               Ücretsiz Hesap Oluştur
             </Link>
