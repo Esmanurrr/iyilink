@@ -52,14 +52,12 @@ export const fetchLinks = createAsyncThunk(
   }
 );
 
-// Public kullanıcı bağlantılarını getirme
 export const fetchPublicLinks = createAsyncThunk(
   "links/fetchPublicLinks",
   async (userId, { rejectWithValue }) => {
     try {
       if (!userId) return rejectWithValue("Kullanıcı ID'si gereklidir");
 
-      // Koleksiyon yolu (links) ve userId filtresi ile sorgu
       const linksQuery = query(
         collection(db, "links"),
         where("userId", "==", userId)
@@ -78,6 +76,51 @@ export const fetchPublicLinks = createAsyncThunk(
       return links;
     } catch (error) {
       console.error("Public linkleri getirme hatası:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Public kullanıcı bağlantılarını username ile getirme
+export const fetchPublicLinksByUsername = createAsyncThunk(
+  "links/fetchPublicLinksByUsername",
+  async (username, { rejectWithValue, getState }) => {
+    try {
+      if (!username) return rejectWithValue("Kullanıcı adı gereklidir");
+
+      // Önce publicProfile'ı kontrol et, yoksa veya farklı bir kullanıcı ise null dön
+      const { publicProfile } = getState().user;
+
+      if (!publicProfile || publicProfile.username !== username.toLowerCase()) {
+        return rejectWithValue("Kullanıcı profili bulunamadı");
+      }
+
+      // Kullanıcı ID'si ile linkleri getir
+      const userId = publicProfile.id;
+
+      if (!userId) {
+        return rejectWithValue("Kullanıcı ID'si bulunamadı");
+      }
+
+      // Links koleksiyonunda userId'ye göre sorgula
+      const linksQuery = query(
+        collection(db, "links"),
+        where("userId", "==", userId)
+      );
+
+      const querySnapshot = await getDocs(linksQuery);
+      const links = [];
+
+      querySnapshot.forEach((doc) => {
+        links.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      return links;
+    } catch (error) {
+      console.error("Username ile public linkleri getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
@@ -318,8 +361,22 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
+      // fetchPublicLinksByUsername
+      .addCase(fetchPublicLinksByUsername.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPublicLinksByUsername.fulfilled, (state, action) => {
+        state.loading = false;
+        state.publicLinks = action.payload;
+      })
+      .addCase(fetchPublicLinksByUsername.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       // incrementLinkClicks
-      .addCase(incrementLinkClicks.pending, (state) => {
+      .addCase(incrementLinkClicks.pending, () => {
         // İşlem çok hızlı olduğu için loading state'i değiştirmiyoruz
       })
       .addCase(incrementLinkClicks.fulfilled, (state, action) => {
@@ -387,7 +444,6 @@ export const linksSlice = createSlice({
       })
       .addCase(updateLinkById.fulfilled, (state, action) => {
         state.loading = false;
-        // Listede güncelle
         const index = state.links.findIndex(
           (link) => link.id === action.payload.id
         );

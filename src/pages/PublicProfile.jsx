@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPublicProfile } from "../redux/slices/userSlice";
+import { fetchProfileByUsername } from "../redux/slices/userSlice";
 import {
-  fetchPublicLinks,
+  fetchPublicLinksByUsername,
   incrementLinkClicks,
 } from "../redux/slices/linksSlice";
 
 const PublicProfile = () => {
-  const { userId } = useParams();
+  const { username } = useParams();
   const dispatch = useDispatch();
 
   // Redux store'dan verileri çek
@@ -28,12 +28,19 @@ const PublicProfile = () => {
   const error = userError || linksError;
 
   useEffect(() => {
-    if (userId) {
-      // Redux thunks kullanarak profil ve linkleri getir
-      dispatch(fetchPublicProfile(userId));
-      dispatch(fetchPublicLinks(userId));
+    if (username) {
+      // Önce kullanıcı profilini getir
+      dispatch(fetchProfileByUsername(username))
+        .unwrap()
+        .then(() => {
+          // Profil başarıyla alındıktan sonra linkleri getir
+          dispatch(fetchPublicLinksByUsername(username));
+        })
+        .catch((error) => {
+          console.error("Profil veya link getirme hatası:", error);
+        });
     }
-  }, [userId, dispatch]);
+  }, [username, dispatch]);
 
   const handleLinkClick = (linkId) => {
     // Redux thunk ile tıklama sayısını artır
@@ -79,7 +86,7 @@ const PublicProfile = () => {
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center p-6">
           <h1 className="text-2xl font-bold mb-4">Kullanıcı Bulunamadı</h1>
-          <p>Bu profil mevcut değil veya kaldırılmış olabilir.</p>
+          <p>Bu kullanıcı adına sahip bir profil bulunamadı.</p>
         </div>
       </div>
     );
@@ -112,7 +119,7 @@ const PublicProfile = () => {
             style={{ color: "var(--color-dark-text)" }}
           >
             {publicProfile.displayName ||
-              publicProfile.email?.split("@")[0] ||
+              publicProfile.username ||
               "İsimsiz Kullanıcı"}
           </h3>
           <p

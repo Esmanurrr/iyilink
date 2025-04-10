@@ -3,11 +3,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import LinksManager from "../components/links/LinksManager";
 import ProfilePreview from "../components/ProfilePreview";
+import { useSelector } from "react-redux";
 
 // Links Management Component
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
+  const { profile } = useSelector((state) => state.user);
   const [links, setLinks] = useState([
     {
       id: 1,
@@ -132,6 +134,17 @@ export default function Dashboard() {
     }
   };
 
+  // Kullanıcının username'i varsa göster, yoksa email'den oluştur
+  const getUsernameFromProfile = () => {
+    if (profile?.username) {
+      return profile.username;
+    } else if (currentUser?.email) {
+      return currentUser.email.split("@")[0].toLowerCase();
+    } else {
+      return currentUser?.uid?.substring(0, 8) || "user";
+    }
+  };
+
   return (
     <div
       className="min-h-screen py-10 px-4"
@@ -157,7 +170,7 @@ export default function Dashboard() {
               </h1>
               <div className="flex items-center">
                 <p style={{ color: "var(--color-light-text)" }}>
-                  iyilink.co/{currentUser.uid.substring(0, 8)}
+                  iyilink.co/{getUsernameFromProfile()}
                 </p>
                 <button
                   className="ml-2 text-sm p-1 rounded-md"
@@ -165,6 +178,14 @@ export default function Dashboard() {
                     backgroundColor: "var(--color-neutral-light)",
                     color: "var(--color-dark-text)",
                   }}
+                  onClick={() => {
+                    const profileUrl = `${
+                      window.location.origin
+                    }/${getUsernameFromProfile()}`;
+                    navigator.clipboard.writeText(profileUrl);
+                    // İsteğe bağlı: kopyalandığına dair bir bildirim gösterilebilir
+                  }}
+                  title="Linki kopyala"
                 >
                   <svg
                     className="w-4 h-4"

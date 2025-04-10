@@ -6,7 +6,16 @@ import {
   updateProfile,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
 // Async thunks
@@ -34,12 +43,19 @@ export const signup = createAsyncThunk(
         name,
         surname,
         displayName: `${name} ${surname}`,
+        username: email.split("@")[0].toLowerCase(), // Kullanıcı adı olarak e-postanın başlangıcını kullan
         role: "user",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
 
-      return { ...user, name, surname, role: "user" };
+      return {
+        ...user,
+        name,
+        surname,
+        role: "user",
+        username: email.split("@")[0].toLowerCase(),
+      };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -111,7 +127,7 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// Kullanıcı public profilini getirme
+// Kullanıcı public profilini getirme (ID ile)
 export const fetchPublicProfile = createAsyncThunk(
   "user/fetchPublicProfile",
   async (userId, { rejectWithValue }) => {
@@ -133,6 +149,41 @@ export const fetchPublicProfile = createAsyncThunk(
       };
     } catch (error) {
       console.error("Public profil getirme hatası:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Kullanıcı profilini username ile getirme
+export const fetchProfileByUsername = createAsyncThunk(
+  "user/fetchProfileByUsername",
+  async (username, { rejectWithValue }) => {
+    try {
+      if (!username) {
+        return rejectWithValue("Kullanıcı adı gereklidir");
+      }
+
+      // username alanına göre kullanıcıları sorgula
+      const usersRef = collection(db, "users");
+      const q = query(
+        usersRef,
+        where("username", "==", username.toLowerCase())
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        return rejectWithValue("Kullanıcı bulunamadı");
+      }
+
+      // İlk eşleşen kullanıcıyı al (username benzersiz olmalı)
+      const userDoc = querySnapshot.docs[0];
+
+      return {
+        id: userDoc.id,
+        ...userDoc.data(),
+      };
+    } catch (error) {
+      console.error("Username ile profil getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
@@ -233,6 +284,19 @@ export const userSlice = createSlice({
         state.publicProfile = action.payload;
       })
       .addCase(fetchPublicProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch Profile By Username
+      .addCase(fetchProfileByUsername.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProfileByUsername.fulfilled, (state, action) => {
+        state.loading = false;
+        state.publicProfile = action.payload;
+      })
+      .addCase(fetchProfileByUsername.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
