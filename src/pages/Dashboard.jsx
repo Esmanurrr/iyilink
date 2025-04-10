@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import LinksManager from "../components/links/LinksManager";
@@ -10,37 +9,6 @@ import { useSelector } from "react-redux";
 export default function Dashboard() {
   const { currentUser } = useAuth();
   const { profile } = useSelector((state) => state.user);
-  const [links, setLinks] = useState([
-    {
-      id: 1,
-      title: "GitHub",
-      url: "https://github.com/username",
-      icon: "github",
-      clicks: 124,
-    },
-    {
-      id: 2,
-      title: "LinkedIn",
-      url: "https://linkedin.com/in/username",
-      icon: "linkedin",
-      clicks: 89,
-    },
-    {
-      id: 3,
-      title: "Kişisel Web Sitem",
-      url: "https://example.com",
-      icon: "globe",
-      clicks: 56,
-    },
-    {
-      id: 4,
-      title: "Twitter",
-      url: "https://twitter.com/username",
-      icon: "twitter",
-      clicks: 47,
-    },
-  ]);
-  const [isAddingLink, setIsAddingLink] = useState(false);
 
   if (!currentUser) {
     return (
@@ -277,22 +245,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
           {/* Links Section - 7 columns wide on large screens */}
           <div className="lg:col-span-7">
-            <LinksManager
-              links={links}
-              setLinks={setLinks}
-              isAddingLink={isAddingLink}
-              setIsAddingLink={setIsAddingLink}
-              getIconComponent={getIconComponent}
-            />
+            <LinksManager getIconComponent={getIconComponent} />
           </div>
 
           {/* Preview Section - 5 columns wide on large screens */}
           <div className="lg:col-span-5">
-            <ProfilePreview
-              currentUser={currentUser}
-              links={links}
-              getIconComponent={getIconComponent}
-            />
+            <ProfilePreview getIconComponent={getIconComponent} />
           </div>
         </div>
       </div>
