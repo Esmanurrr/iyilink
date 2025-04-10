@@ -6,6 +6,8 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,14 +20,26 @@ export default function Signup() {
       return setError("Şifreler eşleşmiyor");
     }
 
+    if (!name || !surname) {
+      return setError("Ad ve soyad alanları zorunludur");
+    }
+
     try {
       setError("");
       setLoading(true);
-      await signup(email, password);
+      await signup(email, password, name, surname);
       navigate("/dashboard");
     } catch (error) {
-      setError("Hesap oluşturulamadı. Lütfen tekrar deneyin.");
-      console.error(error);
+      console.error("Signup error:", error);
+      if (error.code === "auth/email-already-in-use") {
+        setError("Bu email adresi zaten kullanımda");
+      } else if (error.code === "auth/weak-password") {
+        setError("Şifre en az 6 karakter olmalıdır");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Geçersiz email adresi");
+      } else {
+        setError("Hesap oluşturulamadı. Lütfen tekrar deneyin.");
+      }
     } finally {
       setLoading(false);
     }
@@ -45,6 +59,41 @@ export default function Signup() {
         )}
 
         <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                htmlFor="name"
+                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Ad
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="surname"
+                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Soyad
+              </label>
+              <input
+                type="text"
+                id="surname"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                required
+              />
+            </div>
+          </div>
+
           <div className="mb-4">
             <label
               htmlFor="email"

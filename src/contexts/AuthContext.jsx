@@ -1,4 +1,15 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth } from "../firebase";
 
 const AuthContext = createContext();
 
@@ -10,90 +21,76 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function signup(email, password, name, surname) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser = {
-          uid: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          email,
-          displayName: `${name} ${surname}`,
-        };
-        setCurrentUser(mockUser);
-        resolve(mockUser);
-      }, 800);
-    });
+  async function signup(email, password, name, surname) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // Update user profile with name and surname
+      await updateProfile(userCredential.user, {
+        displayName: `${name} ${surname}`,
+      });
+
+      return userCredential.user;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  function login(email, password) {
-    // Burada firebase veya başka bir auth servisi kullanılabilir
-    // Şimdilik mock bir işlem yapıyoruz
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Demo için basit kontrol
-        if (email === "demo@example.com" && password === "password") {
-          const user = { email, id: "123456" };
-          localStorage.setItem("user", JSON.stringify(user));
-          setCurrentUser(user);
-          resolve(user);
-        } else {
-          reject(new Error("Email veya şifre hatalı"));
-        }
-      }, 1000);
-    });
+  async function login(email, password) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      return userCredential.user;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  function logout() {
-    // Burada firebase veya başka bir auth servisi kullanılabilir
-    // Şimdilik mock bir işlem yapıyoruz
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        localStorage.removeItem("user");
-        setCurrentUser(null);
-        resolve();
-      }, 500);
-    });
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    return userCredential.user;
   }
 
-  function resetPassword(email) {
-    // Burada firebase veya başka bir auth servisi kullanılabilir
-    // Şimdilik mock bir işlem yapıyoruz
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Şifre sıfırlama linki ${email} adresine gönderildi`);
-        resolve();
-      }, 1000);
-    });
+  async function logout() {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      throw error;
+    }
   }
 
-  function updateUserProfile(user, profile) {
-    // Burada firebase veya başka bir auth servisi kullanılabilir
-    // Şimdilik mock bir işlem yapıyoruz
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const updatedUser = { ...user, ...profile };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        setCurrentUser(updatedUser);
-        resolve(updatedUser);
-      }, 800);
-    });
+  async function resetPassword(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      throw error;
+    }
   }
 
   useEffect(() => {
-    // Sayfa yüklendiğinde local storage'dan kullanıcı bilgisini kontrol et
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   const value = {
     currentUser,
     signup,
     login,
+    loginWithGoogle,
     logout,
     resetPassword,
-    updateUserProfile,
   };
 
   return (
