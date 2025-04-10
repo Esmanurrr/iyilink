@@ -111,8 +111,36 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// Kullanıcı public profilini getirme
+export const fetchPublicProfile = createAsyncThunk(
+  "user/fetchPublicProfile",
+  async (userId, { rejectWithValue }) => {
+    try {
+      if (!userId) {
+        return rejectWithValue("Kullanıcı ID'si gereklidir");
+      }
+
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        return rejectWithValue("Kullanıcı bulunamadı");
+      }
+
+      return {
+        id: userId,
+        ...userDoc.data(),
+      };
+    } catch (error) {
+      console.error("Public profil getirme hatası:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   profile: null,
+  publicProfile: null,
   loading: false,
   error: null,
 };
@@ -124,6 +152,9 @@ export const userSlice = createSlice({
     clearProfile: (state) => {
       state.profile = null;
       state.error = null;
+    },
+    clearPublicProfile: (state) => {
+      state.publicProfile = null;
     },
   },
   extraReducers: (builder) => {
@@ -191,9 +222,22 @@ export const userSlice = createSlice({
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Fetch Public Profile
+      .addCase(fetchPublicProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPublicProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.publicProfile = action.payload;
+      })
+      .addCase(fetchPublicProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearProfile } = userSlice.actions;
+export const { clearProfile, clearPublicProfile } = userSlice.actions;
 export default userSlice.reducer;
