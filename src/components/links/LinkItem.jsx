@@ -8,9 +8,35 @@ const LinkItem = ({
   isEditingMode,
   getIconComponent,
 }) => {
+  // URL'yi görüntülemek için kısalt (mobil için)
+  const shortenUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname + (urlObj.pathname !== "/" ? "..." : "");
+    } catch {
+      // Geçerli bir URL değilse orijinali döndür
+      return url.length > 25 ? url.substring(0, 22) + "..." : url;
+    }
+  };
+
+  // Orta boy ekranlar için URL'yi kısmen kısalt (1024px-1280px)
+  const mediumShortenUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      let path = urlObj.pathname;
+      if (path.length > 15) {
+        path = path.substring(0, 12) + "...";
+      }
+      return urlObj.hostname + path;
+    } catch {
+      // Geçerli bir URL değilse veya çok uzunsa kısalt
+      return url.length > 40 ? url.substring(0, 37) + "..." : url;
+    }
+  };
+
   return (
     <div
-      className="p-4 rounded-lg flex justify-between items-center border-l-4"
+      className="p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-4 gap-3"
       style={{
         backgroundColor: "var(--color-neutral-light)",
         borderLeftColor: "var(--color-primary)",
@@ -18,9 +44,9 @@ const LinkItem = ({
         boxShadow: "0 2px 4px var(--color-shadow)",
       }}
     >
-      <div className="flex items-center">
+      <div className="flex items-center w-full sm:w-auto">
         <div
-          className="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0"
           style={{
             backgroundColor: "var(--color-accent)",
             color: "var(--color-primary)",
@@ -28,9 +54,9 @@ const LinkItem = ({
         >
           {getIconComponent(link.icon)}
         </div>
-        <div>
+        <div className="min-w-0 flex-1 max-w-full">
           <h3
-            className="font-medium"
+            className="font-medium text-sm sm:text-base truncate"
             style={{ color: "var(--color-dark-text)" }}
           >
             {link.title}
@@ -39,23 +65,29 @@ const LinkItem = ({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm hover:underline"
+            className="text-xs sm:text-sm hover:underline truncate block"
             style={{ color: "var(--color-link)" }}
+            title={link.url}
           >
-            {link.url}
+            <span className="hidden xl:inline">{link.url}</span>
+            <span className="hidden md:inline xl:hidden">
+              {mediumShortenUrl(link.url)}
+            </span>
+            <span className="md:hidden">{shortenUrl(link.url)}</span>
           </a>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
-        <div className="text-right">
+
+      <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-4 md:flex-shrink-0">
+        <div className="text-left sm:text-right mr-2 whitespace-nowrap">
           <span
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{ color: "var(--color-light-text)" }}
           >
             Tıklamalar
           </span>
           <p
-            className="font-medium"
+            className="font-medium text-sm sm:text-base"
             style={{ color: "var(--color-dark-text)" }}
           >
             {link.clicks}
@@ -64,15 +96,16 @@ const LinkItem = ({
         <div className="flex space-x-2">
           <button
             onClick={() => onEdit(link.id)}
-            className="p-2 rounded-md transition-colors"
+            className="p-1.5 sm:p-2 rounded-md transition-colors flex-shrink-0"
             style={{
               backgroundColor: "var(--color-neutral)",
               color: "var(--color-primary)",
             }}
             disabled={loading || isEditingMode}
+            title="Düzenle"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -87,15 +120,16 @@ const LinkItem = ({
           </button>
           <button
             onClick={() => onDelete(link.id)}
-            className="p-2 rounded-md transition-colors"
+            className="p-1.5 sm:p-2 rounded-md transition-colors flex-shrink-0"
             style={{
               backgroundColor: "var(--color-neutral)",
               color: "var(--color-danger)",
             }}
             disabled={loading || isEditingMode}
+            title="Sil"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
