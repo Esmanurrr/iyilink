@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
-import LinksManager from "../components/LinksManager";
+import LinksManager from "../components/links/LinksManager";
 import ProfilePreview from "../components/ProfilePreview";
 
 // Links Management Component
