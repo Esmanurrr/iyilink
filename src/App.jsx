@@ -1,13 +1,9 @@
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/AppRoutes";
-import { AuthProvider } from "./contexts/AuthContext";
+// AuthProvider artık AppRoutes.jsx dosyasında kullanılıyor
 
 function App() {
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

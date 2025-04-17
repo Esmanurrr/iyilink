@@ -22,20 +22,16 @@ export const signup = createAsyncThunk(
   "user/signup",
   async ({ email, password, name, surname }, { rejectWithValue }) => {
     try {
-      console.log("[Signup Thunk] Kullanıcı Auth'da oluşturuluyor...");
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
-      console.log("[Signup Thunk] Kullanıcı Auth'da oluşturuldu:", user.uid);
 
-      console.log("[Signup Thunk] Auth profili güncelleniyor...");
       await updateProfile(user, {
         displayName: `${name} ${surname}`,
       });
-      console.log("[Signup Thunk] Auth profili güncellendi.");
 
       const userRef = doc(db, "users", user.uid);
       const userData = {
@@ -50,9 +46,7 @@ export const signup = createAsyncThunk(
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      console.log("[Signup Thunk] Firestore'a yazılacak veri:", userData);
       await setDoc(userRef, userData);
-      console.log("[Signup Thunk] Firestore'a belge yazıldı:", user.uid);
 
       return {
         uid: user.uid,
@@ -183,7 +177,9 @@ export const fetchProfileByUsername = createAsyncThunk(
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        return rejectWithValue("Kullanıcı bulunamadı");
+        return rejectWithValue(
+          `"${username}" kullanıcı adına sahip bir profil bulunamadı.`
+        );
       }
 
       const userDoc = querySnapshot.docs[0];
@@ -328,22 +324,10 @@ export const userSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProfileByUsername.fulfilled, (state, action) => {
-        console.log(
-          "[Redux userSlice] fetchProfileByUsername.fulfilled",
-          action.payload
-        );
         state.loading = false;
         state.publicProfile = action.payload;
-        console.log(
-          "[Redux userSlice] Güncel state.publicProfile:",
-          state.publicProfile
-        );
       })
       .addCase(fetchProfileByUsername.rejected, (state, action) => {
-        console.log(
-          "[Redux userSlice] fetchProfileByUsername.rejected",
-          action.payload
-        );
         state.loading = false;
         state.error = action.payload;
       });

@@ -120,7 +120,7 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
       const querySnapshot = await getDocs(linksQuery);
 
       if (querySnapshot.empty) {
-        return []; // Boş array dön, hata değil
+        return [];
       }
       const links = [];
       querySnapshot.forEach((doc) => {
@@ -276,6 +276,46 @@ export const fetchUserLinks = async (userId) => {
   }));
 };
 
+export const fetchLinksByUserId = createAsyncThunk(
+  "links/fetchLinksByUserId",
+  async (userId, { rejectWithValue }) => {
+    try {
+      if (!userId) return rejectWithValue("Kullanıcı ID'si gereklidir");
+
+      const userLinksRef = collection(db, "users", userId, "links");
+      const linksSnapshot = await getDocs(userLinksRef);
+
+      if (!linksSnapshot.empty) {
+        const links = linksSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        return links;
+      }
+
+      const linksQuery = query(
+        collection(db, "links"),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(linksQuery);
+
+      if (querySnapshot.empty) {
+        return [];
+      }
+
+      const links = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return links;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   links: [],
   publicLinks: [],
@@ -372,29 +412,14 @@ export const linksSlice = createSlice({
 
       // fetchPublicLinksByUsername
       .addCase(fetchPublicLinksByUsername.pending, (state) => {
-        console.log(
-          "[Redux] fetchPublicLinksByUsername.pending - Loading başlıyor"
-        );
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPublicLinksByUsername.fulfilled, (state, action) => {
-        console.log(
-          "[Redux] fetchPublicLinksByUsername.fulfilled - Veri geldi:",
-          action.payload
-        );
         state.loading = false; // ÖNEMLI: Bu satırı kontrol et
         state.publicLinks = action.payload;
-        console.log(
-          "[Redux] publicLinks state güncellendi:",
-          state.publicLinks.length
-        );
       })
       .addCase(fetchPublicLinksByUsername.rejected, (state, action) => {
-        console.log(
-          "[Redux] fetchPublicLinksByUsername.rejected - Hata:",
-          action.payload
-        );
         state.loading = false;
         state.error = action.payload;
       })
@@ -404,8 +429,6 @@ export const linksSlice = createSlice({
         // İşlem çok hızlı olduğu için loading state'i değiştirmiyoruz
       })
       .addCase(incrementLinkClicks.fulfilled, (state, action) => {
-        // Tıklama sayısını artırma işlemi başarılı oldu
-        // Public linkleri arasında ilgili linki bulup tıklama sayısını artır
         const { linkId } = action.payload;
         const linkIndex = state.publicLinks.findIndex(
           (link) => link.id === linkId
@@ -495,6 +518,20 @@ export const linksSlice = createSlice({
         state.links = state.links.filter((link) => link.id !== action.payload);
       })
       .addCase(deleteLinkById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // fetchLinksByUserId (Yeni action)
+      .addCase(fetchLinksByUserId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchLinksByUserId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.publicLinks = action.payload;
+      })
+      .addCase(fetchLinksByUserId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

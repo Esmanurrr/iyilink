@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 
 // Components
 import Layout from "../components/Layout";
@@ -11,18 +11,47 @@ import Dashboard from "../pages/Dashboard";
 import PublicProfile from "../pages/PublicProfile";
 import { AuthProvider } from "../contexts/AuthContext";
 
+const MainLayout = () => (
+  <AuthProvider>
+    <Layout />
+  </AuthProvider>
+);
+
+const MinimalLayout = () => (
+  <div
+    className="minimal-layout"
+    style={{
+      minHeight: "100vh",
+      backgroundColor: "var(--color-background)",
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    <Outlet />
+  </div>
+);
+
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <MainLayout />,
     children: [
       { index: true, element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
-      { path: "dashboard", element: <Dashboard /> },
     ],
   },
-  { path: "/:username", element: <PublicProfile /> },
+
+  {
+    path: "/",
+    element: <MinimalLayout />,
+    children: [
+      {
+        path: ":username",
+        element: <PublicProfile />,
+      },
+    ],
+  },
 ]);
 
 export default router;
