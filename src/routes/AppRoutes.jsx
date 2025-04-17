@@ -31,6 +31,8 @@ const MinimalLayout = () => (
   </div>
 );
 
+const RESERVED_ROUTES = ["dashboard", "login", "signup", "settings", "admin"];
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -39,16 +41,26 @@ export const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
+      { path: "dashboard", element: <Dashboard /> },
     ],
   },
 
   {
-    path: "/",
+    path: "/:username",
     element: <MinimalLayout />,
     children: [
       {
-        path: ":username",
+        index: true,
         element: <PublicProfile />,
+        loader: ({ params }) => {
+          if (RESERVED_ROUTES.includes(params.username)) {
+            throw new Response("", {
+              status: 302,
+              headers: { Location: "/" },
+            });
+          }
+          return null;
+        },
       },
     ],
   },
