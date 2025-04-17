@@ -9,6 +9,9 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Firebase timestamp'leri için
+      serializableCheck: false,
     }),
+  devTools: import.meta.env.NODE_ENV !== "production",
 });
+
+export default store;
