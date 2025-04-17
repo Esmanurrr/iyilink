@@ -18,43 +18,47 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
-// Async thunks
 export const signup = createAsyncThunk(
   "user/signup",
   async ({ email, password, name, surname }, { rejectWithValue }) => {
     try {
-      // Create user in Firebase Auth
+      console.log("[Signup Thunk] Kullanıcı Auth'da oluşturuluyor...");
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
+      console.log("[Signup Thunk] Kullanıcı Auth'da oluşturuldu:", user.uid);
 
-      // Update Auth profile
+      console.log("[Signup Thunk] Auth profili güncelleniyor...");
       await updateProfile(user, {
         displayName: `${name} ${surname}`,
       });
+      console.log("[Signup Thunk] Auth profili güncellendi.");
 
-      // Create user profile in Firestore
       const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
+      const userData = {
         email,
         name,
         surname,
         displayName: `${name} ${surname}`,
-        username: email.split("@")[0].toLowerCase(), // Kullanıcı adı olarak e-postanın başlangıcını kullan
+        username:
+          email.split("@")[0].toLowerCase() +
+          Math.random().toString(36).substring(2, 7),
         role: "user",
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      };
+      console.log("[Signup Thunk] Firestore'a yazılacak veri:", userData);
+      await setDoc(userRef, userData);
+      console.log("[Signup Thunk] Firestore'a belge yazıldı:", user.uid);
 
       return {
-        ...user,
-        name,
-        surname,
-        role: "user",
-        username: email.split("@")[0].toLowerCase(),
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        ...userData,
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -73,14 +77,25 @@ export const login = createAsyncThunk(
       );
       const user = userCredential.user;
 
-      // Get user profile from Firestore
       const userRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userRef);
 
       if (userDoc.exists()) {
-        return { ...user, ...userDoc.data() };
+        const profileData = userDoc.data();
+        return {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          ...profileData,
+        };
+      } else {
+        return {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          _firestoreMissing: true,
+        };
       }
-      return user;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -127,7 +142,6 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// Kullanıcı public profilini getirme (ID ile)
 export const fetchPublicProfile = createAsyncThunk(
   "user/fetchPublicProfile",
   async (userId, { rejectWithValue }) => {
@@ -148,13 +162,11 @@ export const fetchPublicProfile = createAsyncThunk(
         ...userDoc.data(),
       };
     } catch (error) {
-      console.error("Public profil getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Kullanıcı profilini username ile getirme
 export const fetchProfileByUsername = createAsyncThunk(
   "user/fetchProfileByUsername",
   async (username, { rejectWithValue }) => {
@@ -163,7 +175,6 @@ export const fetchProfileByUsername = createAsyncThunk(
         return rejectWithValue("Kullanıcı adı gereklidir");
       }
 
-      // username alanına göre kullanıcıları sorgula
       const usersRef = collection(db, "users");
       const q = query(
         usersRef,
@@ -175,19 +186,42 @@ export const fetchProfileByUsername = createAsyncThunk(
         return rejectWithValue("Kullanıcı bulunamadı");
       }
 
-      // İlk eşleşen kullanıcıyı al (username benzersiz olmalı)
       const userDoc = querySnapshot.docs[0];
-
-      return {
+      const userData = {
         id: userDoc.id,
         ...userDoc.data(),
       };
+
+      return userData;
     } catch (error) {
-      console.error("Username ile profil getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
 );
+
+export const findUserByUsername = async (usernameToFind) => {
+  let usersRef = collection(db, "users");
+
+  let q = query(usersRef, where("username", "==", usernameToFind));
+  let snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    q = query(usersRef, where("username", "==", usernameToFind.toLowerCase()));
+    snapshot = await getDocs(q);
+  }
+
+  if (snapshot.empty) {
+    throw new Error(
+      `"${usernameToFind}" kullanıcı adına sahip bir profil bulunamadı.`
+    );
+  }
+
+  const userDoc = snapshot.docs[0];
+  return {
+    id: userDoc.id,
+    ...userDoc.data(),
+  };
+};
 
 const initialState = {
   profile: null,
@@ -289,14 +323,27 @@ export const userSlice = createSlice({
       })
       // Fetch Profile By Username
       .addCase(fetchProfileByUsername.pending, (state) => {
+        console.log("[Redux userSlice] fetchProfileByUsername.pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchProfileByUsername.fulfilled, (state, action) => {
+        console.log(
+          "[Redux userSlice] fetchProfileByUsername.fulfilled",
+          action.payload
+        );
         state.loading = false;
         state.publicProfile = action.payload;
+        console.log(
+          "[Redux userSlice] Güncel state.publicProfile:",
+          state.publicProfile
+        );
       })
       .addCase(fetchProfileByUsername.rejected, (state, action) => {
+        console.log(
+          "[Redux userSlice] fetchProfileByUsername.rejected",
+          action.payload
+        );
         state.loading = false;
         state.error = action.payload;
       });

@@ -1,183 +1,343 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchProfileByUsername } from "../redux/slices/userSlice";
 import {
-  fetchPublicLinksByUsername,
-  incrementLinkClicks,
-} from "../redux/slices/linksSlice";
+  doc,
+  updateDoc,
+  increment,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { clearPublicProfile } from "../redux/slices/userSlice";
+import { clearLinks } from "../redux/slices/linksSlice";
+
+// Link ikonu bileşeni
+const LinkIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M14.828 14.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+    />
+  </svg>
+);
 
 const PublicProfile = () => {
   const { username } = useParams();
   const dispatch = useDispatch();
 
-  // Redux store'dan verileri çek
-  const {
-    publicProfile,
-    loading: userLoading,
-    error: userError,
-  } = useSelector((state) => state.user);
-  const {
-    publicLinks,
-    loading: linksLoading,
-    error: linksError,
-  } = useSelector((state) => state.links);
-
-  // Yükleme ve hata durumlarını birleştir
-  const loading = userLoading || linksLoading;
-  const error = userError || linksError;
+  // Yerel state'ler - Redux'a güvenmeden önce direkt Firestore'dan veri çekelim
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [links, setLinks] = useState([]);
 
   useEffect(() => {
-    if (username) {
-      // Önce kullanıcı profilini getir
-      dispatch(fetchProfileByUsername(username))
-        .unwrap()
-        .then(() => {
-          // Profil başarıyla alındıktan sonra linkleri getir
-          dispatch(fetchPublicLinksByUsername(username));
-        })
-        .catch((error) => {
-          console.error("Profil veya link getirme hatası:", error);
-        });
-    }
+    // Asenkron veri yükleme fonksiyonu
+    const fetchProfileData = async () => {
+      if (!username) return;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log(`Profil yükleniyor: ${username}`);
+
+        // 1. Kullanıcıyı Firestore'dan doğrudan bul
+        const usersRef = collection(db, "users");
+        let userQuery = query(usersRef, where("username", "==", username));
+        let userSnapshot = await getDocs(userQuery);
+
+        // Büyük-küçük harf duyarlılığı için ikinci kontrol
+        if (userSnapshot.empty) {
+          userQuery = query(
+            usersRef,
+            where("username", "==", username.toLowerCase())
+          );
+          userSnapshot = await getDocs(userQuery);
+        }
+
+        if (userSnapshot.empty) {
+          setError(
+            `"${username}" kullanıcı adına sahip bir profil bulunamadı.`
+          );
+          setLoading(false);
+          return;
+        }
+
+        // Kullanıcı profilini al
+        const userDoc = userSnapshot.docs[0];
+        const userData = {
+          id: userDoc.id,
+          ...userDoc.data(),
+        };
+
+        console.log("Kullanıcı bulundu:", userData.username);
+        setProfile(userData);
+
+        // 2. Kullanıcının linklerini getir
+        const userLinksRef = collection(db, "users", userData.id, "links");
+        const linksSnapshot = await getDocs(userLinksRef);
+
+        const userLinks = linksSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        console.log(`${userLinks.length} link bulundu`);
+        setLinks(userLinks);
+
+        // Redux state'lerini de güncelle (temizlik için)
+        dispatch(clearPublicProfile());
+        dispatch(clearLinks());
+      } catch (err) {
+        console.error("Profil yükleme hatası:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+
+    // Cleanup
+    return () => {
+      dispatch(clearPublicProfile());
+      dispatch(clearLinks());
+    };
   }, [username, dispatch]);
 
-  const handleLinkClick = (linkId) => {
-    // Redux thunk ile tıklama sayısını artır
-    dispatch(incrementLinkClicks(linkId));
+  // Link tıklaması için handler
+  const handleLinkClick = async (linkId, url) => {
+    // Önce linki aç - kullanıcı deneyimi için önemli
+    window.open(url, "_blank", "noopener,noreferrer");
 
-    // Kullanıcı için anında geri bildirim (isteğe bağlı, Redux state güncellenecek zaten)
-    const clickCountEl = document.querySelector(
-      `[data-link-id="${linkId}"] .click-count`
-    );
-    if (clickCountEl) {
-      const currentClicks = parseInt(
-        clickCountEl.getAttribute("data-clicks") || "0",
-        10
-      );
-      clickCountEl.setAttribute("data-clicks", currentClicks + 1);
-      clickCountEl.textContent = currentClicks + 1;
+    // Sonra tıklama sayısını artırmayı dene (sessizce)
+    if (profile?.id) {
+      try {
+        const linkRef = doc(db, "users", profile.id, "links", linkId);
+        await updateDoc(linkRef, {
+          clicks: increment(1),
+        });
+      } catch {
+        // Sessizce hataları yok say - kullanıcı deneyimini etkilemez
+      }
     }
   };
 
+  // Sayfa stilini tanımla
+  const pageStyle = {
+    minHeight: "100vh",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "2rem 1rem",
+    backgroundColor: "var(--color-background)",
+  };
+
+  // Yükleme durumu
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div style={pageStyle}>
         <div
-          className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
-          style={{ borderColor: "var(--color-primary)" }}
-        ></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!publicProfile) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center p-6">
-          <h1 className="text-2xl font-bold mb-4">Kullanıcı Bulunamadı</h1>
-          <p>Bu kullanıcı adına sahip bir profil bulunamadı.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "var(--color-background)" }}
-    >
-      <div className="max-w-md mx-auto">
-        <div
-          className="border rounded-lg p-8 text-center"
+          className="flex justify-center items-center h-64 rounded-xl w-full max-w-md"
           style={{
-            borderColor: "var(--color-border)",
-            backgroundColor: "var(--color-highlight)",
-            boxShadow: "0 2px 4px var(--color-shadow)",
+            backgroundColor: "var(--color-card-bg)",
+            boxShadow: "0 4px 12px var(--color-shadow)",
           }}
         >
           <div
-            className="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold"
-            style={{ backgroundColor: "var(--color-primary)" }}
+            className="animate-spin rounded-full h-12 w-12 border-b-2"
+            style={{ borderColor: "var(--color-primary)" }}
+          ></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Hata durumu
+  if (error) {
+    return (
+      <div style={pageStyle}>
+        <div
+          className="p-6 rounded-xl w-full max-w-md"
+          style={{
+            backgroundColor: "var(--color-card-bg)",
+            boxShadow: "0 4px 12px var(--color-shadow)",
+            border: "1px solid var(--color-error)",
+          }}
+        >
+          <p className="font-bold mb-2" style={{ color: "var(--color-error)" }}>
+            Hata
+          </p>
+          <p style={{ color: "var(--color-light-text)" }}>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Profil bulunamadı durumu
+  if (!profile) {
+    return (
+      <div style={pageStyle}>
+        <div
+          className="p-6 rounded-xl w-full max-w-md"
+          style={{
+            backgroundColor: "var(--color-card-bg)",
+            boxShadow: "0 4px 12px var(--color-shadow)",
+            border: "1px solid var(--color-warning)",
+          }}
+        >
+          <p
+            className="font-bold mb-2"
+            style={{ color: "var(--color-warning)" }}
           >
-            {publicProfile.email?.charAt(0).toUpperCase() ||
-              publicProfile.displayName?.charAt(0).toUpperCase() ||
-              "?"}
-          </div>
-          <h3
-            className="text-lg font-medium mb-1"
+            Profil Bulunamadı
+          </p>
+          <p style={{ color: "var(--color-light-text)" }}>
+            "{username}" kullanıcı adına sahip bir profil bulunamadı.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Kullanıcı bilgileri
+  const displayName =
+    profile.displayName || profile.username || "İsimsiz Kullanıcı";
+  const firstLetter = (displayName || "?").charAt(0).toUpperCase();
+
+  // Ana render
+  return (
+    <div style={pageStyle}>
+      <div
+        className="rounded-xl p-8 w-full max-w-md"
+        style={{
+          backgroundColor: "var(--color-card-bg)",
+          boxShadow: "0 4px 12px var(--color-shadow)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        {/* Profil Kartı */}
+        <div
+          className="text-center mb-8 p-6 rounded-lg"
+          style={{
+            backgroundColor: "var(--color-highlight)",
+            border: "1px solid var(--color-border)",
+            boxShadow: "0 2px 4px var(--color-shadow)",
+          }}
+        >
+          {profile.photoURL ? (
+            <img
+              src={profile.photoURL}
+              alt={displayName}
+              className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2"
+              style={{ borderColor: "var(--color-primary)" }}
+            />
+          ) : (
+            <div
+              className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              {firstLetter}
+            </div>
+          )}
+
+          <h1
+            className="text-2xl font-bold mb-2"
             style={{ color: "var(--color-dark-text)" }}
           >
-            {publicProfile.displayName ||
-              publicProfile.username ||
-              "İsimsiz Kullanıcı"}
-          </h3>
-          <p
-            className="mb-6 text-sm"
-            style={{ color: "var(--color-light-text)" }}
-          >
-            {publicProfile.bio ||
-              "Sosyal medya hesaplarım ve kişisel linklerim"}
-          </p>
+            {displayName}
+          </h1>
 
-          <div className="space-y-3 max-w-sm mx-auto">
-            {publicLinks?.length === 0 ? (
-              <p
-                className="text-center py-4"
-                style={{ color: "var(--color-light-text)" }}
-              >
-                Bu kullanıcı henüz link eklememiş.
-              </p>
-            ) : (
-              publicLinks?.map((link) => (
-                <a
+          {profile.bio && (
+            <p
+              className="max-w-lg mx-auto text-center mb-2"
+              style={{ color: "var(--color-light-text)" }}
+            >
+              {profile.bio}
+            </p>
+          )}
+
+          <p className="text-sm" style={{ color: "var(--color-light-text)" }}>
+            @{profile.username}
+          </p>
+        </div>
+
+        {/* Linkler */}
+        <div className="space-y-4">
+          {!links || links.length === 0 ? (
+            <div
+              className="p-8 text-center rounded-lg"
+              style={{
+                backgroundColor: "var(--color-highlight)",
+                color: "var(--color-light-text)",
+              }}
+            >
+              Henüz link eklenmemiş.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {links.map((link) => (
+                <div
                   key={link.id}
-                  data-link-id={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block py-2 px-3 rounded-lg transition-colors flex items-center justify-center hover:opacity-90"
+                  className="block py-3 px-4 rounded-lg transition-colors flex items-center hover:opacity-90 cursor-pointer"
+                  onClick={() => handleLinkClick(link.id, link.url)}
                   style={{
                     backgroundColor: "white",
                     color: "var(--color-dark-text)",
                     border: "1px solid var(--color-border)",
                     boxShadow: "0 2px 4px var(--color-shadow)",
                   }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLinkClick(link.id);
-                    window.open(link.url, "_blank", "noopener,noreferrer");
-                  }}
                 >
-                  <span className="font-medium">{link.title}</span>
-                  {link.clicks > 0 && (
-                    <span
-                      className="ml-auto text-xs opacity-60 click-count"
-                      title="Tıklama sayısı"
-                      data-clicks={link.clicks}
-                    >
-                      {link.clicks}
-                    </span>
-                  )}
-                </a>
-              ))
-            )}
-          </div>
+                  <span
+                    className="mr-3"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    <LinkIcon />
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="font-medium">
+                      {link.title || "İsimsiz Link"}
+                    </h3>
+                    {link.description && (
+                      <p
+                        className="text-sm mt-1"
+                        style={{ color: "var(--color-light-text)" }}
+                      >
+                        {link.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="text-center mt-6">
-          <p className="text-xs" style={{ color: "var(--color-light-text)" }}>
-            Powered by IYILINK
-          </p>
+
+        {/* Alt not */}
+        <div
+          className="mt-8 text-xs text-center"
+          style={{ color: "var(--color-light-text)" }}
+        >
+          <p>{profile.username}'in profil sayfası • IyiLink ile oluşturuldu</p>
         </div>
       </div>
     </div>

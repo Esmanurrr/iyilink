@@ -14,12 +14,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
-// Kullanıcı bağlantılarını getirme
 export const fetchLinks = createAsyncThunk(
   "links/fetchLinks",
   async (userId, { rejectWithValue }) => {
     try {
-      // Ensure userId exists
       if (!userId) return rejectWithValue("User ID is required");
 
       const linksCollectionRef = collection(db, "users", userId, "links");
@@ -27,7 +25,6 @@ export const fetchLinks = createAsyncThunk(
 
       const links = [];
       querySnapshot.forEach((doc) => {
-        // Convert Firestore Timestamp to JS Date if needed
         const data = doc.data();
         const createdAt = data.createdAt
           ? new Date(data.createdAt.seconds * 1000)
@@ -46,7 +43,6 @@ export const fetchLinks = createAsyncThunk(
 
       return links;
     } catch (error) {
-      console.error("Error fetching links:", error);
       return rejectWithValue(error.message);
     }
   }
@@ -75,42 +71,58 @@ export const fetchPublicLinks = createAsyncThunk(
 
       return links;
     } catch (error) {
-      console.error("Public linkleri getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Public kullanıcı bağlantılarını username ile getirme
 export const fetchPublicLinksByUsername = createAsyncThunk(
   "links/fetchPublicLinksByUsername",
-  async (username, { rejectWithValue, getState }) => {
+  async (username, { rejectWithValue }) => {
     try {
       if (!username) return rejectWithValue("Kullanıcı adı gereklidir");
 
-      // Önce publicProfile'ı kontrol et, yoksa veya farklı bir kullanıcı ise null dön
-      const { publicProfile } = getState().user;
+      const usersRef = collection(db, "users");
+      const userQuery = query(
+        usersRef,
+        where("username", "==", username.toLowerCase())
+      );
 
-      if (!publicProfile || publicProfile.username !== username.toLowerCase()) {
-        return rejectWithValue("Kullanıcı profili bulunamadı");
+      const userQuerySnapshot = await getDocs(userQuery);
+
+      if (userQuerySnapshot.empty) {
+        return rejectWithValue("Kullanıcı bulunamadı");
       }
 
-      // Kullanıcı ID'si ile linkleri getir
-      const userId = publicProfile.id;
+      const userDoc = userQuerySnapshot.docs[0];
+      const userId = userDoc.id;
 
-      if (!userId) {
-        return rejectWithValue("Kullanıcı ID'si bulunamadı");
+      const userLinksCollection = collection(db, "users", userId, "links");
+      const userLinksSnapshot = await getDocs(userLinksCollection);
+
+      if (!userLinksSnapshot.empty) {
+        const links = [];
+        userLinksSnapshot.forEach((doc) => {
+          links.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+
+        return links;
       }
 
-      // Links koleksiyonunda userId'ye göre sorgula
       const linksQuery = query(
         collection(db, "links"),
         where("userId", "==", userId)
       );
 
       const querySnapshot = await getDocs(linksQuery);
-      const links = [];
 
+      if (querySnapshot.empty) {
+        return []; // Boş array dön, hata değil
+      }
+      const links = [];
       querySnapshot.forEach((doc) => {
         links.push({
           id: doc.id,
@@ -120,13 +132,11 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
 
       return links;
     } catch (error) {
-      console.error("Username ile public linkleri getirme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Link tıklama sayısını artırma
 export const incrementLinkClicks = createAsyncThunk(
   "links/incrementLinkClicks",
   async (linkId, { rejectWithValue }) => {
@@ -135,21 +145,17 @@ export const incrementLinkClicks = createAsyncThunk(
 
       const linkRef = doc(db, "links", linkId);
 
-      // Tıklama sayısını Firestore'da güncelle
       await updateDoc(linkRef, {
         clicks: increment(1),
       });
 
-      // Arayüz için dönen değer
       return { linkId };
     } catch (error) {
-      console.error("Link tıklama sayısını güncelleme hatası:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Tek bir bağlantıyı getirme
 export const fetchLinkById = createAsyncThunk(
   "links/fetchLinkById",
   async ({ userId, linkId }, { rejectWithValue }) => {
@@ -179,25 +185,20 @@ export const fetchLinkById = createAsyncThunk(
         return rejectWithValue("Link not found");
       }
     } catch (error) {
-      console.error("Error fetching link:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Yeni bağlantı ekleme
 export const createLink = createAsyncThunk(
   "links/createLink",
   async ({ userId, linkData }, { rejectWithValue }) => {
     try {
-      // Ensure userId exists
       if (!userId) return rejectWithValue("User ID is required");
 
-      // Create document reference properly
       const userDocRef = doc(db, "users", userId);
       const linksCollectionRef = collection(userDocRef, "links");
 
-      // Sanitize and prepare link data
       const newLink = {
         title: linkData.title || "",
         url: linkData.url || "",
@@ -207,10 +208,8 @@ export const createLink = createAsyncThunk(
         updatedAt: serverTimestamp(),
       };
 
-      // Add the document to Firestore
       const docRef = await addDoc(linksCollectionRef, newLink);
 
-      // Return the new link with local dates for immediate UI update
       return {
         id: docRef.id,
         ...newLink,
@@ -218,13 +217,11 @@ export const createLink = createAsyncThunk(
         updatedAt: new Date(),
       };
     } catch (error) {
-      console.error("Error creating link:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Bağlantı güncelleme
 export const updateLinkById = createAsyncThunk(
   "links/updateLinkById",
   async ({ userId, linkId, linkData }, { rejectWithValue }) => {
@@ -247,13 +244,11 @@ export const updateLinkById = createAsyncThunk(
         updatedAt: new Date(),
       };
     } catch (error) {
-      console.error("Error updating link:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Bağlantı silme
 export const deleteLinkById = createAsyncThunk(
   "links/deleteLinkById",
   async ({ userId, linkId }, { rejectWithValue }) => {
@@ -266,15 +261,25 @@ export const deleteLinkById = createAsyncThunk(
 
       return linkId;
     } catch (error) {
-      console.error("Error deleting link:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
+export const fetchUserLinks = async (userId) => {
+  const linksRef = collection(db, "users", userId, "links");
+  const snapshot = await getDocs(linksRef);
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
 const initialState = {
   links: [],
-  publicLinks: [], // Public linkler için yeni state
+  publicLinks: [],
+  currentLink: null,
   loading: false,
   error: null,
   isAddingLink: false,
@@ -294,6 +299,10 @@ export const linksSlice = createSlice({
     },
     clearPublicLinks: (state) => {
       state.publicLinks = [];
+      state.error = null;
+    },
+    clearCurrentLink: (state) => {
+      state.currentLink = null;
     },
     setIsAddingLink: (state, action) => {
       state.isAddingLink = action.payload;
@@ -363,14 +372,29 @@ export const linksSlice = createSlice({
 
       // fetchPublicLinksByUsername
       .addCase(fetchPublicLinksByUsername.pending, (state) => {
+        console.log(
+          "[Redux] fetchPublicLinksByUsername.pending - Loading başlıyor"
+        );
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPublicLinksByUsername.fulfilled, (state, action) => {
-        state.loading = false;
+        console.log(
+          "[Redux] fetchPublicLinksByUsername.fulfilled - Veri geldi:",
+          action.payload
+        );
+        state.loading = false; // ÖNEMLI: Bu satırı kontrol et
         state.publicLinks = action.payload;
+        console.log(
+          "[Redux] publicLinks state güncellendi:",
+          state.publicLinks.length
+        );
       })
       .addCase(fetchPublicLinksByUsername.rejected, (state, action) => {
+        console.log(
+          "[Redux] fetchPublicLinksByUsername.rejected - Hata:",
+          action.payload
+        );
         state.loading = false;
         state.error = action.payload;
       })
@@ -480,6 +504,7 @@ export const linksSlice = createSlice({
 export const {
   clearLinks,
   clearPublicLinks,
+  clearCurrentLink,
   setIsAddingLink,
   setNewLink,
   updateNewLinkField,
