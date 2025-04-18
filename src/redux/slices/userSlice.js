@@ -20,8 +20,23 @@ import { auth, db } from "../../firebase";
 
 export const signup = createAsyncThunk(
   "user/signup",
-  async ({ email, password, name, surname }, { rejectWithValue }) => {
+  async ({ email, password, name, surname, username }, { rejectWithValue }) => {
     try {
+      if (username) {
+        const usersRef = collection(db, "users");
+        const q = query(
+          usersRef,
+          where("username", "==", username.toLowerCase())
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          return rejectWithValue(
+            "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin."
+          );
+        }
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -39,10 +54,10 @@ export const signup = createAsyncThunk(
         name,
         surname,
         displayName: `${name} ${surname}`,
-        username:
-          email.split("@")[0].toLowerCase() +
-          Math.random().toString(36).substring(2, 7),
-        role: "user",
+        username: username
+          ? username.toLowerCase()
+          : email.split("@")[0].toLowerCase() +
+            Math.random().toString(36).substring(2, 7),
         createdAt: new Date(),
         updatedAt: new Date(),
       };

@@ -1,33 +1,46 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useSelector } from "react-redux";
 
 export default function Signup() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.user);
   const { signup } = useAuth();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: "",
+      surname: "",
+      username: "",
+      email: "",
+      password: "",
+      passwordConfirm: "",
+    },
+  });
 
-    if (password !== passwordConfirm) {
-      return setError("Şifreler eşleşmiyor");
-    }
-
-    if (!name || !surname) {
-      return setError("Ad ve soyad alanları zorunludur");
+  const onSubmit = async (data) => {
+    if (data.password !== data.passwordConfirm) {
+      setError("Şifreler eşleşmiyor");
+      return;
     }
 
     try {
       setError("");
-      setLoading(true);
-      await signup(email, password, name, surname);
+      await signup(
+        data.email,
+        data.password,
+        data.name,
+        data.surname,
+        data.username
+      );
       navigate("/dashboard");
     } catch (error) {
       console.error("Signup error:", error);
@@ -37,13 +50,13 @@ export default function Signup() {
         setError("Şifre en az 6 karakter olmalıdır");
       } else if (error.code === "auth/invalid-email") {
         setError("Geçersiz email adresi");
+      } else if (error.message && error.message.includes("username")) {
+        setError(error.message); // Kullanıcı adı ile ilgili özel hata mesajları
       } else {
         setError("Hesap oluşturulamadı. Lütfen tekrar deneyin.");
       }
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-md mx-auto my-8">
@@ -58,7 +71,7 @@ export default function Signup() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label
@@ -70,11 +83,14 @@ export default function Signup() {
               <input
                 type="text"
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name", { required: "Ad alanı zorunludur" })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
               />
+              {errors.name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.name.message}
+                </span>
+              )}
             </div>
             <div>
               <label
@@ -86,12 +102,53 @@ export default function Signup() {
               <input
                 type="text"
                 id="surname"
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
+                {...register("surname", { required: "Soyad alanı zorunludur" })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
+              />
+              {errors.surname && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.surname.message}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="username"
+              className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Kullanıcı Adı
+            </label>
+            <div className="relative flex">
+              <div className="flex items-center bg-gray-100 border border-r-0 border-gray-300 rounded-l-md px-3 text-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
+                iyilink.co/
+              </div>
+              <input
+                type="text"
+                id="username"
+                {...register("username", {
+                  required: "Kullanıcı adı zorunludur",
+                  pattern: {
+                    value: /^[a-z0-9_-]+$/i,
+                    message:
+                      "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir",
+                  },
+                  setValueAs: (value) => value.toLowerCase(),
+                })}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                placeholder="kullanici-adim"
               />
             </div>
+            {errors.username && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.username.message}
+              </span>
+            )}
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Profilinizin bağlantısı: iyilink.co/
+              {watch("username") || "kullanici-adim"}
+            </p>
           </div>
 
           <div className="mb-4">
@@ -104,11 +161,20 @@ export default function Signup() {
             <input
               type="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email", {
+                required: "Email alanı zorunludur",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Geçerli bir email adresi giriniz",
+                },
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              required
             />
+            {errors.email && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           <div className="mb-4">
@@ -121,12 +187,20 @@ export default function Signup() {
             <input
               type="password"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password", {
+                required: "Şifre alanı zorunludur",
+                minLength: {
+                  value: 6,
+                  message: "Şifre en az 6 karakter olmalıdır",
+                },
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              required
-              minLength="6"
             />
+            {errors.password && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.password.message}
+              </span>
+            )}
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               En az 6 karakter olmalıdır
             </p>
@@ -134,19 +208,26 @@ export default function Signup() {
 
           <div className="mb-6">
             <label
-              htmlFor="password-confirm"
+              htmlFor="passwordConfirm"
               className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Şifre Tekrar
             </label>
             <input
               type="password"
-              id="password-confirm"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
+              id="passwordConfirm"
+              {...register("passwordConfirm", {
+                required: "Şifre tekrar alanı zorunludur",
+                validate: (value) =>
+                  value === watch("password") || "Şifreler eşleşmiyor",
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              required
             />
+            {errors.passwordConfirm && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.passwordConfirm.message}
+              </span>
+            )}
           </div>
 
           <button

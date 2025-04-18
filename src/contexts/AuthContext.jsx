@@ -43,8 +43,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    signup: (email, password, name, surname) =>
-      dispatch(signup({ email, password, name, surname })),
+    signup: (email, password, name, surname, username) =>
+      dispatch(signup({ email, password, name, surname, username })),
     login: (email, password) => dispatch(login({ email, password })),
     logout: () => dispatch(logout()),
     resetPassword: (email) => dispatch(resetPassword(email)),
