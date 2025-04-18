@@ -172,7 +172,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <button
+            <Link
+              to="/profile/edit"
               className="px-4 py-2 rounded-lg transition-colors flex items-center"
               style={{
                 backgroundColor: "var(--color-primary)",
@@ -194,7 +195,7 @@ export default function Dashboard() {
                 />
               </svg>
               Profili Düzenle
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

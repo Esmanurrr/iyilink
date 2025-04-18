@@ -9,6 +9,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
 import PublicProfile from "../pages/PublicProfile";
+import ProfileEdit from "../components/ProfileEdit";
 import { AuthProvider } from "../contexts/AuthContext";
 
 const MainLayout = () => (
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
       { path: "dashboard", element: <Dashboard /> },
+      { path: "profile/edit", element: <ProfileEdit /> },
     ],
   },
 
