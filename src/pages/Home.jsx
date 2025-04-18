@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import Loading from "../components/Loading";
 
 export default function Home() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading, authInitialized } = useAuth();
+
+  // Auth durumu yükleniyorsa loading göster
+  if (loading || !authInitialized) {
+    return <Loading message="Sayfa hazırlanıyor..." />;
+  }
 
   return (
     <div style={{ backgroundColor: "#FFFFFF" }}>

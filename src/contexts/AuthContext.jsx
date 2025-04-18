@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import {
 } from "../redux/slices/userSlice";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import Loading from "../components/Loading";
 
 const AuthContext = createContext();
 
@@ -19,22 +20,32 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
-  const { profile: currentUser, loading } = useSelector((state) => state.user);
+  const { profile, loading: reduxLoading } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Kullanıcı giriş yaptığında Firestore'dan profil bilgilerini al
-        const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
+      setLoading(true);
+      try {
+        if (user) {
+          // Kullanıcı giriş yaptığında Firestore'dan profil bilgilerini al
+          const userRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userRef);
 
-        if (userDoc.exists()) {
-          dispatch(login.fulfilled({ ...user, ...userDoc.data() }));
+          if (userDoc.exists()) {
+            dispatch(login.fulfilled({ ...user, ...userDoc.data() }));
+          } else {
+            dispatch(login.fulfilled(user));
+          }
         } else {
-          dispatch(login.fulfilled(user));
+          dispatch(logout.fulfilled());
         }
-      } else {
-        dispatch(logout.fulfilled());
+      } catch (error) {
+        console.error("Auth state change error:", error);
+      } finally {
+        setLoading(false);
+        setAuthInitialized(true);
       }
     });
 
@@ -42,7 +53,10 @@ export function AuthProvider({ children }) {
   }, [dispatch]);
 
   const value = {
-    currentUser,
+    currentUser: profile,
+    isAuthenticated: !!profile,
+    loading: loading || reduxLoading,
+    authInitialized,
     signup: (email, password, name, surname, username) =>
       dispatch(signup({ email, password, name, surname, username })),
     login: (email, password) => dispatch(login({ email, password })),
@@ -50,9 +64,10 @@ export function AuthProvider({ children }) {
     resetPassword: (email) => dispatch(resetPassword(email)),
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  // Tüm uygulama çapında auth yüklenirken loading ekranı göster
+  if (loading && !authInitialized) {
+    return <Loading message="Oturum bilgileri kontrol ediliyor..." />;
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

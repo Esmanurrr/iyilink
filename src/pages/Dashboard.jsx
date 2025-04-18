@@ -3,13 +3,20 @@ import { Link } from "react-router-dom";
 import LinksManager from "../components/links/LinksManager";
 import ProfilePreview from "../components/ProfilePreview";
 import { useSelector } from "react-redux";
+import Loading from "../components/Loading";
 
 // Links Management Component
 
 export default function Dashboard() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading, authInitialized } = useAuth();
   const { profile } = useSelector((state) => state.user);
 
+  // Auth durumu yükleniyorsa veya profile yükleniyorsa loading göster
+  if (loading || !authInitialized) {
+    return <Loading message="Profil bilgileri yükleniyor..." />;
+  }
+
+  // Kullanıcı henüz giriş yapmamışsa
   if (!currentUser) {
     return (
       <div
