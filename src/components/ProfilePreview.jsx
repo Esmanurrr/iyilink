@@ -36,13 +36,12 @@ const ProfilePreview = ({ getIconComponent }) => {
   // Kullanıcı adını belirle
   const username =
     profile.username || profile.email?.split("@")[0]?.toLowerCase() || "";
-  const displayName =
-    profile.displayName || profile.email?.split("@")[0] || "İsimsiz Kullanıcı";
 
-  // Profil resmi için ilk harf
-  const firstLetter = (profile.displayName || profile.email || "?")
-    .charAt(0)
-    .toUpperCase();
+  // DEĞIŞIKLIK: displayName yerine username'i göster, "@" ile ön ek ekle
+  const displayText = `@${username}`;
+
+  // Profil resmi için ilk harf - username'in ilk harfini kullanalım
+  const firstLetter = (username || "?").charAt(0).toUpperCase();
 
   // Tam profil URL'si
   const profileUrl = `${window.location.origin}/${username}`;
@@ -133,7 +132,7 @@ const ProfilePreview = ({ getIconComponent }) => {
           className="text-lg font-medium mb-1"
           style={{ color: "var(--color-dark-text)" }}
         >
-          {displayName}
+          {displayText}
         </h3>
         <p
           className="mb-6 text-sm"
