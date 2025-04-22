@@ -122,12 +122,30 @@ const ProfilePreview = ({ getIconComponent }) => {
           boxShadow: "0 2px 4px var(--color-shadow)",
         }}
       >
-        <div
-          className="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold"
-          style={{ backgroundColor: "var(--color-primary)" }}
-        >
-          {firstLetter}
-        </div>
+        {profile.photoURL ? (
+          <img
+            src={profile.photoURL}
+            alt={username}
+            className="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto mb-4 object-cover border-2"
+            style={{ borderColor: "var(--color-primary)" }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.style.display = "none";
+              e.target.parentNode.innerHTML = `<div
+                class="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold"
+                style="background-color: var(--color-primary)">
+                ${firstLetter}
+              </div>`;
+            }}
+          />
+        ) : (
+          <div
+            className="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold"
+            style={{ backgroundColor: "var(--color-primary)" }}
+          >
+            {firstLetter}
+          </div>
+        )}
         <h3
           className="text-lg font-medium mb-1"
           style={{ color: "var(--color-dark-text)" }}

@@ -108,10 +108,7 @@ const PublicProfile = () => {
   const isLoading = userLoading || linksLoading;
 
   // Kullanıcı bilgileri
-  const displayName =
-    publicProfile?.displayName ||
-    publicProfile?.username ||
-    "İsimsiz Kullanıcı";
+  const displayName = publicProfile?.username || "İsimsiz Kullanıcı";
   const firstLetter = (displayName || "?").charAt(0).toUpperCase();
 
   return (
@@ -148,16 +145,13 @@ const PublicProfile = () => {
                 </div>
               )}
               <h1 className="text-xl font-bold mb-2 text-[color:var(--color-dark-text)]">
-                {displayName}
+                @{publicProfile.username}
               </h1>
               {publicProfile.bio && (
                 <p className="mb-3 text-[color:var(--color-light-text)]">
                   {publicProfile.bio}
                 </p>
               )}
-              <p className="text-sm text-[color:var(--color-light-text)]">
-                @{publicProfile.username}
-              </p>
             </div>
 
             {/* Linkler */}
