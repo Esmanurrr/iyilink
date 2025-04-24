@@ -1,6 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { auth, db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
 import {
   login,
@@ -8,8 +17,7 @@ import {
   signup,
   resetPassword,
 } from "../redux/slices/userSlice";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import Loading from "../components/Loading";
 
 const AuthContext = createContext();
@@ -52,16 +60,191 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, [dispatch]);
 
+  // Firebase auth yöntemleri
+  const loginUser = async (email, password) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      return userCredential.user;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
+  };
+
+  const signupUser = async (email, password, name, surname, username) => {
+    try {
+      // 1. Kullanıcı oluştur
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // 2. Displayname güncelle
+      await updateProfile(user, {
+        displayName: `${name} ${surname}`,
+      });
+
+      // 3. Firestore'a kullanıcı belgesi ekle
+      const userRef = doc(db, "users", user.uid);
+      const userData = {
+        email,
+        name,
+        surname,
+        displayName: `${name} ${surname}`,
+        username: username
+          ? username.toLowerCase()
+          : email.split("@")[0].toLowerCase() +
+            Math.random().toString(36).substring(2, 7),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        totalViews: 0,
+        monthlyStats: {},
+      };
+
+      await setDoc(userRef, userData);
+      return { ...user, ...userData };
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    }
+  };
+
+  // Google ile giriş
+  const loginWithGoogle = async () => {
+    try {
+      // 1. Google pop-up ile giriş yap
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // 2. Firestore'dan kullanıcı bilgilerini kontrol et
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      // 3. Eğer kullanıcı daha önce kayıt olmamışsa, oluştur
+      if (!userDoc.exists()) {
+        const nameParts = user.displayName
+          ? user.displayName.split(" ")
+          : ["", ""];
+        const name = nameParts[0] || "";
+        const surname = nameParts.slice(1).join(" ") || "";
+        const username =
+          user.email.split("@")[0].toLowerCase() +
+          Math.random().toString(36).substring(2, 5);
+
+        const userData = {
+          email: user.email,
+          name: name,
+          surname: surname,
+          displayName: user.displayName || `${name} ${surname}`,
+          username: username,
+          photoURL: user.photoURL || "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          totalViews: 0,
+          monthlyStats: {},
+        };
+
+        await setDoc(userRef, userData);
+        return { ...user, ...userData };
+      }
+
+      // 4. Eğer kullanıcı zaten varsa, mevcut bilgileri döndür
+      return { ...user, ...userDoc.data() };
+    } catch (error) {
+      console.error("Google login error:", error);
+      throw error;
+    }
+  };
+
+  // Şifre sıfırlama
+  const resetUserPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error("Password reset error:", error);
+      throw error;
+    }
+  };
+
+  // Çıkış yapma
+  const logoutUser = async () => {
+    try {
+      await signOut(auth);
+      return true;
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
+  };
+
   const value = {
     currentUser: profile,
     isAuthenticated: !!profile,
     loading: loading || reduxLoading,
     authInitialized,
-    signup: (email, password, name, surname, username) =>
-      dispatch(signup({ email, password, name, surname, username })),
-    login: (email, password) => dispatch(login({ email, password })),
-    logout: () => dispatch(logout()),
-    resetPassword: (email) => dispatch(resetPassword(email)),
+    signup: (email, password, name, surname, username) => {
+      return signupUser(email, password, name, surname, username)
+        .then((userData) => {
+          dispatch(signup.fulfilled(userData));
+          return userData;
+        })
+        .catch((error) => {
+          dispatch(signup.rejected(error.message));
+          throw error;
+        });
+    },
+    login: (email, password) => {
+      return loginUser(email, password)
+        .then((user) => {
+          // Auth state change event'i Firestore verilerini yükleyecek
+          return user;
+        })
+        .catch((error) => {
+          dispatch(login.rejected(error.message));
+          throw error;
+        });
+    },
+    loginWithGoogle: () => {
+      return loginWithGoogle()
+        .then((userData) => {
+          dispatch(login.fulfilled(userData));
+          return userData;
+        })
+        .catch((error) => {
+          dispatch(login.rejected(error.message));
+          throw error;
+        });
+    },
+    logout: () => {
+      return logoutUser()
+        .then(() => {
+          dispatch(logout.fulfilled());
+          return true;
+        })
+        .catch((error) => {
+          dispatch(logout.rejected(error.message));
+          throw error;
+        });
+    },
+    resetPassword: (email) => {
+      return resetUserPassword(email)
+        .then(() => {
+          dispatch(resetPassword.fulfilled());
+          return true;
+        })
+        .catch((error) => {
+          dispatch(resetPassword.rejected(error.message));
+          throw error;
+        });
+    },
   };
 
   // Tüm uygulama çapında auth yüklenirken loading ekranı göster

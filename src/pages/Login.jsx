@@ -30,8 +30,14 @@ export default function Login() {
         setError(
           "Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin."
         );
+      } else if (error.code === "auth/invalid-credential") {
+        setError(
+          "Geçersiz kimlik bilgileri. Lütfen email ve şifrenizi kontrol edin."
+        );
       } else {
-        setError("Giriş yapılamadı. Lütfen tekrar deneyin.");
+        setError(
+          "Giriş yapılamadı: " + (error.message || "Lütfen tekrar deneyin.")
+        );
       }
     } finally {
       setLoading(false);
@@ -46,7 +52,20 @@ export default function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Google login error:", error);
-      setError("Google ile giriş yapılamadı. Lütfen tekrar deneyin.");
+      if (error.code === "auth/popup-closed-by-user") {
+        setError("Google ile giriş işlemi iptal edildi.");
+      } else if (error.code === "auth/cancelled-popup-request") {
+        setError("Google giriş penceresi zaten açık.");
+      } else if (error.code === "auth/popup-blocked") {
+        setError(
+          "Giriş penceresi tarayıcı tarafından engellendi. Lütfen popup engellemeyi kaldırın."
+        );
+      } else {
+        setError(
+          "Google ile giriş yapılırken bir hata oluştu: " +
+            (error.message || "Lütfen tekrar deneyin.")
+        );
+      }
     } finally {
       setLoading(false);
     }

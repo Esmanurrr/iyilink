@@ -8,7 +8,7 @@ export default function Signup() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.user);
-  const { signup } = useAuth();
+  const { signup, loginWithGoogle } = useAuth();
 
   const {
     register,
@@ -50,10 +50,41 @@ export default function Signup() {
         setError("Şifre en az 6 karakter olmalıdır");
       } else if (error.code === "auth/invalid-email") {
         setError("Geçersiz email adresi");
+      } else if (error.code === "auth/operation-not-allowed") {
+        setError(
+          "Email/Şifre kimlik doğrulaması devre dışı bırakılmış. Sistem yöneticisiyle iletişime geçin."
+        );
       } else if (error.message && error.message.includes("username")) {
         setError(error.message); // Kullanıcı adı ile ilgili özel hata mesajları
       } else {
-        setError("Hesap oluşturulamadı. Lütfen tekrar deneyin.");
+        setError(
+          "Hesap oluşturulamadı: " + (error.message || "Lütfen tekrar deneyin.")
+        );
+      }
+    }
+  };
+
+  // Google ile hesap oluşturma (aslında Google ile giriş ile aynı)
+  const handleGoogleSignup = async () => {
+    try {
+      setError("");
+      await loginWithGoogle(); // Google ile oturum açınca, kullanıcı yoksa otomatik oluşturulur
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google signup error:", error);
+      if (error.code === "auth/popup-closed-by-user") {
+        setError("Google ile kayıt işlemi iptal edildi.");
+      } else if (error.code === "auth/cancelled-popup-request") {
+        setError("Google kayıt penceresi zaten açık.");
+      } else if (error.code === "auth/popup-blocked") {
+        setError(
+          "Kayıt penceresi tarayıcı tarafından engellendi. Lütfen popup engellemeyi kaldırın."
+        );
+      } else {
+        setError(
+          "Google ile kayıt yapılırken bir hata oluştu: " +
+            (error.message || "Lütfen tekrar deneyin.")
+        );
       }
     }
   };
@@ -70,6 +101,32 @@ export default function Signup() {
             {error}
           </div>
         )}
+
+        {/* Google ile Kaydol butonu ekle */}
+        <button
+          type="button"
+          onClick={handleGoogleSignup}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+        >
+          <img
+            src="https://www.google.com/favicon.ico"
+            alt="Google"
+            className="w-5 h-5"
+          />
+          Google ile Kaydol
+        </button>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              veya
+            </span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-4 mb-4">
