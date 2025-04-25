@@ -2,14 +2,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import LinksManager from "../components/links/LinksManager";
 import ProfilePreview from "../components/ProfilePreview";
-import { useSelector } from "react-redux";
+import ProfileStatisticsCard from "../components/ProfileStatisticsCard";
 import Loading from "../components/Loading";
 
 // Links Management Component
 
 export default function Dashboard() {
   const { currentUser, loading, authInitialized } = useAuth();
-  const { profile } = useSelector((state) => state.user);
 
   // Auth durumu yükleniyorsa veya profile yükleniyorsa loading göster
   if (loading || !authInitialized) {
@@ -109,145 +108,14 @@ export default function Dashboard() {
     }
   };
 
-  // Kullanıcının username'i varsa göster, yoksa email'den oluştur
-  const getUsernameFromProfile = () => {
-    if (profile?.username) {
-      return profile.username;
-    } else if (currentUser?.email) {
-      return currentUser.email.split("@")[0].toLowerCase();
-    } else {
-      return currentUser?.uid?.substring(0, 8) || "user";
-    }
-  };
-
   return (
     <div
       className="min-h-screen py-10 px-4"
       style={{ backgroundColor: "var(--color-background)" }}
     >
       <div className="container mx-auto max-w-6xl">
-        {/* Profile Section */}
-        <div
-          className="rounded-xl p-6 mb-8"
-          style={{
-            backgroundColor: "var(--color-card-bg)",
-            borderColor: "var(--color-border)",
-            boxShadow: "0 4px 12px var(--color-shadow)",
-          }}
-        >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-              <h1
-                className="text-2xl font-bold mb-1"
-                style={{ color: "var(--color-dark-text)" }}
-              >
-                {currentUser.email}
-              </h1>
-              <div className="flex items-center">
-                <p style={{ color: "var(--color-light-text)" }}>
-                  iyilink.co/{getUsernameFromProfile()}
-                </p>
-                <button
-                  className="ml-2 text-sm p-1 rounded-md"
-                  style={{
-                    backgroundColor: "var(--color-neutral-light)",
-                    color: "var(--color-dark-text)",
-                  }}
-                  onClick={() => {
-                    const profileUrl = `${
-                      window.location.origin
-                    }/${getUsernameFromProfile()}`;
-                    navigator.clipboard.writeText(profileUrl);
-                    // İsteğe bağlı: kopyalandığına dair bir bildirim gösterilebilir
-                  }}
-                  title="Linki kopyala"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <Link
-              to="/profile/edit"
-              className="px-4 py-2 rounded-lg transition-colors flex items-center"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                color: "white",
-                boxShadow: "0 2px 4px var(--color-shadow)",
-              }}
-            >
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-              Profili Düzenle
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div
-              className="p-4 rounded-lg"
-              style={{
-                backgroundColor: "var(--color-accent)",
-                boxShadow: "0 2px 4px var(--color-shadow)",
-              }}
-            >
-              <h3
-                className="font-medium mb-2"
-                style={{ color: "var(--color-dark-text)" }}
-              >
-                Toplam Görüntülenme
-              </h3>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: "var(--color-dark-text)" }}
-              >
-                316
-              </p>
-            </div>
-            <div
-              className="p-4 rounded-lg"
-              style={{
-                backgroundColor: "var(--color-accent)",
-                boxShadow: "0 2px 4px var(--color-shadow)",
-              }}
-            >
-              <h3
-                className="font-medium mb-2"
-                style={{ color: "var(--color-dark-text)" }}
-              >
-                Bu Ay
-              </h3>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: "var(--color-dark-text)" }}
-              >
-                87
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Profile Statistics Card */}
+        <ProfileStatisticsCard currentUser={currentUser} />
 
         {/* Links and Preview Section - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">

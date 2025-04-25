@@ -8,6 +8,7 @@ import {
   fetchProfileByUsername,
 } from "../redux/slices/userSlice";
 import { clearLinks, fetchLinksByUserId } from "../redux/slices/linksSlice";
+import { incrementProfileView } from "../redux/slices/statsSlice";
 
 // Link ikonu bileşeni
 const LinkIcon = () => (
@@ -78,6 +79,17 @@ const PublicProfile = () => {
         `[PublicProfile] ${publicProfile.id} ID'li kullanıcının linkleri getiriliyor...`
       );
       dispatch(fetchLinksByUserId(publicProfile.id));
+
+      // Görüntüleme sayısını artır
+      console.log(
+        `[PublicProfile] ${publicProfile.username} profilinin görüntüleme sayısı artırılıyor...`
+      );
+      dispatch(
+        incrementProfileView({
+          userId: publicProfile.id,
+          username: publicProfile.username,
+        })
+      );
     }
 
     // Cleanup

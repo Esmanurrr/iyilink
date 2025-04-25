@@ -18,6 +18,24 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
+// Selectors
+export const selectUsername = (state, user) => {
+  // Önce state'den profile'ı kontrol et
+  if (state.user.profile?.username) {
+    return state.user.profile.username;
+  }
+  // Eğer gönderilen user parametresi varsa onu kullan
+  else if (user) {
+    if (user.username) {
+      return user.username;
+    } else if (user.email) {
+      return user.email.split("@")[0].toLowerCase();
+    }
+  }
+  // Hiçbiri yoksa default değer
+  return "kullanici";
+};
+
 export const signup = createAsyncThunk(
   "user/signup",
   async ({ email, password, name, surname, username }, { rejectWithValue }) => {
