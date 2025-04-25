@@ -5,17 +5,14 @@ import ProfilePreview from "../components/ProfilePreview";
 import ProfileStatisticsCard from "../components/ProfileStatisticsCard";
 import Loading from "../components/Loading";
 
-// Links Management Component
 
 export default function Dashboard() {
   const { currentUser, loading, authInitialized } = useAuth();
 
-  // Auth durumu yükleniyorsa veya profile yükleniyorsa loading göster
   if (loading || !authInitialized) {
     return <Loading message="Profil bilgileri yükleniyor..." />;
   }
 
-  // Kullanıcı henüz giriş yapmamışsa
   if (!currentUser) {
     return (
       <div
@@ -114,17 +111,13 @@ export default function Dashboard() {
       style={{ backgroundColor: "var(--color-background)" }}
     >
       <div className="container mx-auto max-w-6xl">
-        {/* Profile Statistics Card */}
         <ProfileStatisticsCard currentUser={currentUser} />
 
-        {/* Links and Preview Section - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-          {/* Links Section - 7 columns wide on large screens */}
           <div className="lg:col-span-7">
             <LinksManager getIconComponent={getIconComponent} />
           </div>
 
-          {/* Preview Section - 5 columns wide on large screens */}
           <div className="lg:col-span-5">
             <ProfilePreview getIconComponent={getIconComponent} />
           </div>

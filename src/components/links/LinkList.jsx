@@ -11,7 +11,6 @@ const LinkList = ({
   onAdd,
   getIconComponent,
 }) => {
-  // Boş durum: Kullanıcı giriş yapmamış
   if (!profile?.uid) {
     return (
       <div className="text-center py-8">
@@ -22,7 +21,6 @@ const LinkList = ({
     );
   }
 
-  // Yükleniyor durumu
   if (loading && links.length === 0) {
     return (
       <div className="text-center py-8">
@@ -33,7 +31,6 @@ const LinkList = ({
     );
   }
 
-  // Bağlantı yok durumu
   if (!loading && links.length === 0) {
     return (
       <div
@@ -75,7 +72,6 @@ const LinkList = ({
     );
   }
 
-  // Bağlantı listesi
   return (
     <div
       className="space-y-4 overflow-y-auto"

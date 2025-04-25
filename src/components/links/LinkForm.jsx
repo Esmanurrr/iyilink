@@ -1,7 +1,7 @@
 import React from "react";
 
 const LinkForm = ({
-  type = "add", // "add" veya "edit"
+  type = "add",
   formData,
   loading,
   onSubmit,

@@ -18,21 +18,16 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
-// Selectors
 export const selectUsername = (state, user) => {
-  // Önce state'den profile'ı kontrol et
   if (state.user.profile?.username) {
     return state.user.profile.username;
-  }
-  // Eğer gönderilen user parametresi varsa onu kullan
-  else if (user) {
+  } else if (user) {
     if (user.username) {
       return user.username;
     } else if (user.email) {
       return user.email.split("@")[0].toLowerCase();
     }
   }
-  // Hiçbiri yoksa default değer
   return "kullanici";
 };
 
@@ -272,7 +267,6 @@ export const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Signup
     builder
       .addCase(signup.pending, (state) => {
         state.loading = true;
@@ -286,7 +280,6 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -299,7 +292,6 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Logout
       .addCase(logout.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -312,7 +304,6 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -324,7 +315,6 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Update Profile
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -337,7 +327,6 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch Public Profile
       .addCase(fetchPublicProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -350,9 +339,7 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch Profile By Username
       .addCase(fetchProfileByUsername.pending, (state) => {
-        console.log("[Redux userSlice] fetchProfileByUsername.pending");
         state.loading = true;
         state.error = null;
       })

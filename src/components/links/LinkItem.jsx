@@ -8,18 +8,15 @@ const LinkItem = ({
   isEditingMode,
   getIconComponent,
 }) => {
-  // URL'yi görüntülemek için kısalt (mobil için)
   const shortenUrl = (url) => {
     try {
       const urlObj = new URL(url);
       return urlObj.hostname + (urlObj.pathname !== "/" ? "..." : "");
     } catch {
-      // Geçerli bir URL değilse orijinali döndür
       return url.length > 25 ? url.substring(0, 22) + "..." : url;
     }
   };
 
-  // Orta boy ekranlar için URL'yi kısmen kısalt (1024px-1280px)
   const mediumShortenUrl = (url) => {
     try {
       const urlObj = new URL(url);
@@ -29,7 +26,6 @@ const LinkItem = ({
       }
       return urlObj.hostname + path;
     } catch {
-      // Geçerli bir URL değilse veya çok uzunsa kısalt
       return url.length > 40 ? url.substring(0, 37) + "..." : url;
     }
   };

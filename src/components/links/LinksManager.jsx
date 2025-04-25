@@ -37,7 +37,6 @@ const LinksManager = ({ getIconComponent }) => {
     }
   }, [dispatch, profile]);
 
-  // Bağlantı ekleme
   const handleAddLink = async (e) => {
     e.preventDefault();
 
@@ -65,12 +64,10 @@ const LinksManager = ({ getIconComponent }) => {
     }
   };
 
-  // Bağlantı düzenleme modunu başlat
   const handleEditLink = (linkId) => {
     dispatch(startEditingLink(linkId));
   };
 
-  // Bağlantı güncelleme
   const handleUpdateLink = async (e) => {
     e.preventDefault();
 
@@ -94,14 +91,6 @@ const LinksManager = ({ getIconComponent }) => {
         url: editingLink.url,
         icon: editingLink.icon || "link",
       };
-
-      console.log(
-        "Updating link:",
-        editingLinkId,
-        "for user:",
-        profile.uid,
-        linkData
-      );
       await dispatch(
         updateLinkById({
           userId: profile.uid,
@@ -114,12 +103,10 @@ const LinksManager = ({ getIconComponent }) => {
     }
   };
 
-  // Düzenleme iptal
   const handleCancelEdit = () => {
     dispatch(stopEditingLink());
   };
 
-  // Bağlantı silme
   const handleDeleteLink = async (linkId) => {
     if (!profile?.uid) {
       dispatch(setError("Kullanıcı girişi yapılmamış. Lütfen giriş yapın."));
@@ -127,14 +114,12 @@ const LinksManager = ({ getIconComponent }) => {
     }
 
     try {
-      console.log("Deleting link:", linkId, "for user:", profile.uid);
       await dispatch(deleteLinkById({ userId: profile.uid, linkId })).unwrap();
     } catch (error) {
       console.error("Link silme hatası:", error);
     }
   };
 
-  // Form alanı değişikliği (ekleme veya düzenleme)
   const handleFieldChange = (field, value) => {
     if (isEditingLink) {
       dispatch(updateEditingLinkField({ field, value }));
@@ -143,12 +128,10 @@ const LinksManager = ({ getIconComponent }) => {
     }
   };
 
-  // Bağlantı ekleme modunu başlat
   const handleStartAddingLink = () => {
     dispatch(setIsAddingLink(true));
   };
 
-  // Bağlantı ekleme iptal
   const handleCancelAddLink = () => {
     dispatch(setIsAddingLink(false));
   };
@@ -164,7 +147,7 @@ const LinksManager = ({ getIconComponent }) => {
       }}
     >
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h2
           className="text-xl font-bold"
           style={{ color: "var(--color-dark-text)" }}
@@ -174,7 +157,7 @@ const LinksManager = ({ getIconComponent }) => {
         {!isEditingLink && (
           <button
             onClick={handleStartAddingLink}
-            className="px-4 py-2 rounded-lg transition-colors flex items-center"
+            className="px-4 py-2 rounded-lg transition-colors flex items-center justify-center sm:justify-start w-full sm:w-auto"
             style={{
               backgroundColor: "var(--color-primary)",
               color: "white",
@@ -200,7 +183,6 @@ const LinksManager = ({ getIconComponent }) => {
         )}
       </div>
 
-      {/* Error Message */}
       {error && (
         <div
           className="mb-4 p-3 rounded-lg text-white"
@@ -210,7 +192,6 @@ const LinksManager = ({ getIconComponent }) => {
         </div>
       )}
 
-      {/* Add Link Form */}
       {isAddingLink && !isEditingLink && (
         <LinkForm
           type="add"
@@ -222,7 +203,6 @@ const LinksManager = ({ getIconComponent }) => {
         />
       )}
 
-      {/* Edit Link Form */}
       {isEditingLink && editingLink && (
         <LinkForm
           type="edit"
@@ -234,7 +214,6 @@ const LinksManager = ({ getIconComponent }) => {
         />
       )}
 
-      {/* Links List */}
       {!isEditingLink && (
         <LinkList
           links={links}

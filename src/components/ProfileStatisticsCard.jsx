@@ -7,12 +7,10 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
 const ProfileStatisticsCard = ({ currentUser }) => {
-  // State'ler
   const [refreshing, setRefreshing] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [unsubscribe, setUnsubscribe] = useState(null);
 
-  // Redux
   const dispatch = useDispatch();
   const { total, monthly, loading, error } = useSelector(
     (state) =>
@@ -24,10 +22,8 @@ const ProfileStatisticsCard = ({ currentUser }) => {
       }
   );
 
-  // Kullanıcı adını merkezi selector ile hesapla
   const username = useSelector((state) => selectUsername(state, currentUser));
 
-  // Veri çekme fonksiyonu - manuel yenileme için
   const fetchData = async (showLoadingState = false) => {
     if (!currentUser?.uid) {
       return;
@@ -36,27 +32,22 @@ const ProfileStatisticsCard = ({ currentUser }) => {
     if (!showLoadingState) setRefreshing(true);
 
     try {
-      // Redux thunk ile verileri çek
       await dispatch(fetchTotalViews(currentUser.uid));
     } catch {
-      // Hata durumunda sessizce devam et
     } finally {
       setRefreshing(false);
       setIsFirstLoad(false);
     }
   };
 
-  // İlk yükleme - Component Mount olduğunda
   useEffect(() => {
     if (currentUser?.uid && isFirstLoad) {
       fetchData(true);
     }
   }, [currentUser?.uid, isFirstLoad]);
 
-  // Firestore dinleyicisi kurulumu
   useEffect(() => {
     if (currentUser?.uid) {
-      // Firestore belgesi için bir dinleyici ekle
       const userDocRef = doc(db, "users", currentUser.uid);
 
       const unsubscribeListener = onSnapshot(
@@ -70,21 +61,16 @@ const ProfileStatisticsCard = ({ currentUser }) => {
             const monthlyStats = userData.monthlyStats || {};
             const monthlyViews = monthlyStats[currentMonth] || 0;
 
-            // Redux store'daki verileri güncelle
             if (totalViews !== total || monthlyViews !== monthly) {
               dispatch(fetchTotalViews(currentUser.uid));
             }
           }
         },
-        () => {
-          // Hata durumunda sessizce devam et
-        }
+        () => {}
       );
 
-      // Unsubscribe fonksiyonunu state'e kaydet
       setUnsubscribe(() => unsubscribeListener);
 
-      // Component unmount olduğunda dinleyiciyi kaldır
       return () => {
         if (unsubscribe) {
           unsubscribe();
@@ -93,12 +79,10 @@ const ProfileStatisticsCard = ({ currentUser }) => {
     }
   }, [currentUser?.uid, dispatch, total, monthly]);
 
-  // Manuel yenileme
   const handleRefresh = () => {
     fetchData(true);
   };
 
-  // Son güncelleme zamanını formatla
   const formatLastUpdated = () => {
     return new Date().toLocaleTimeString();
   };
@@ -121,11 +105,14 @@ const ProfileStatisticsCard = ({ currentUser }) => {
             @{username}
           </h1>
           <div className="flex items-center">
-            <p style={{ color: "var(--color-light-text)" }}>
+            <p
+              className="truncate"
+              style={{ color: "var(--color-light-text)" }}
+            >
               iyilink.co/{username}
             </p>
             <button
-              className="ml-2 text-sm p-1 rounded-md"
+              className="ml-2 text-sm p-1 rounded-md flex-shrink-0"
               style={{
                 backgroundColor: "var(--color-neutral-light)",
                 color: "var(--color-dark-text)",
@@ -155,11 +142,11 @@ const ProfileStatisticsCard = ({ currentUser }) => {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <button
             onClick={handleRefresh}
             disabled={loading || refreshing}
-            className="px-2 py-1 rounded-lg text-sm flex items-center"
+            className="px-2 py-1 rounded-lg text-sm flex items-center justify-center"
             style={{
               backgroundColor: "var(--color-neutral-light)",
               color: "var(--color-dark-text)",
@@ -186,7 +173,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
 
           <Link
             to="/profile/edit"
-            className="px-4 py-2 rounded-lg transition-colors flex items-center"
+            className="px-4 py-2 rounded-lg transition-colors flex items-center justify-center"
             style={{
               backgroundColor: "var(--color-primary)",
               color: "white",

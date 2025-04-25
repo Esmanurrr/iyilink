@@ -10,7 +10,6 @@ import {
 import { clearLinks, fetchLinksByUserId } from "../redux/slices/linksSlice";
 import { incrementProfileView } from "../redux/slices/statsSlice";
 
-// Link ikonu bileşeni
 const LinkIcon = () => (
   <svg
     className="w-4 h-4"
@@ -37,18 +36,6 @@ const PublicProfile = () => {
   const { username } = useParams();
   const dispatch = useDispatch();
 
-  // Mount takibi
-  useEffect(() => {
-    console.log("🟢 PUBLIC PROFILE MOUNT OLDU - " + new Date().toISOString());
-
-    return () => {
-      console.log(
-        "🔴 PUBLIC PROFILE UNMOUNT OLDU - " + new Date().toISOString()
-      );
-    };
-  }, []);
-
-  // Redux state'lerinden veri çek
   const {
     loading: userLoading,
     error: userError,
@@ -59,10 +46,8 @@ const PublicProfile = () => {
     (state) => state.links
   );
 
-  // Kullanıcı profilini getir (sadece username değiştiğinde)
   useEffect(() => {
     if (username) {
-      console.log(`[PublicProfile] ${username} için profil getiriliyor...`);
       dispatch(fetchProfileByUsername(username));
     }
 
@@ -72,18 +57,9 @@ const PublicProfile = () => {
     };
   }, [username, dispatch]);
 
-  // Kullanıcı profili gelince, linkleri getir
   useEffect(() => {
     if (publicProfile?.id) {
-      console.log(
-        `[PublicProfile] ${publicProfile.id} ID'li kullanıcının linkleri getiriliyor...`
-      );
       dispatch(fetchLinksByUserId(publicProfile.id));
-
-      // Görüntüleme sayısını artır
-      console.log(
-        `[PublicProfile] ${publicProfile.username} profilinin görüntüleme sayısı artırılıyor...`
-      );
       dispatch(
         incrementProfileView({
           userId: publicProfile.id,
@@ -98,42 +74,33 @@ const PublicProfile = () => {
     };
   }, [publicProfile, dispatch]);
 
-  // Link tıklaması için handler
   const handleLinkClick = async (linkId, url) => {
-    // Önce linki aç - kullanıcı deneyimi için önemli
     window.open(url, "_blank", "noopener,noreferrer");
 
-    // Sonra tıklama sayısını artırmayı dene (sessizce)
     if (publicProfile?.id) {
       try {
         const linkRef = doc(db, "users", publicProfile.id, "links", linkId);
         await updateDoc(linkRef, {
           clicks: increment(1),
         });
-      } catch {
-        // Sessizce hataları yok say - kullanıcı deneyimini etkilemez
-      }
+      } catch {}
     }
   };
 
-  // Genel loading durumu
   const isLoading = userLoading || linksLoading;
 
-  // Kullanıcı bilgileri
   const displayName = publicProfile?.username || "İsimsiz Kullanıcı";
   const firstLetter = (displayName || "?").charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 md:p-8 bg-[color:var(--color-background)] relative z-10">
       <div className="max-w-lg w-full bg-[color:var(--color-card-bg)] rounded-xl shadow-lg p-6 md:p-8 border border-[color:var(--color-border)]">
-        {/* Yükleme durumu */}
         {isLoading && (
           <div className="flex justify-center py-8">
             <div className="w-10 h-10 rounded-full border-t-2 border-r-transparent border-[color:var(--color-primary)] animate-spin"></div>
           </div>
         )}
 
-        {/* Hata durumu */}
         {userError && (
           <div className="p-4 bg-red-50 text-red-700 rounded-lg mb-4">
             <p className="font-bold">Hata</p>
@@ -141,7 +108,6 @@ const PublicProfile = () => {
           </div>
         )}
 
-        {/* Profil bilgileri */}
         {!isLoading && publicProfile && (
           <>
             <div className="text-center mb-8 bg-[color:var(--color-highlight)] p-6 rounded-lg border border-[color:var(--color-border)]">
@@ -166,7 +132,6 @@ const PublicProfile = () => {
               )}
             </div>
 
-            {/* Linkler */}
             <div className="mt-6">
               {!publicLinks || publicLinks.length === 0 ? (
                 <div className="p-6 text-center bg-[color:var(--color-highlight)] text-[color:var(--color-light-text)] rounded-lg">

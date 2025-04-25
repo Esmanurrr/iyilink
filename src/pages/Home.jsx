@@ -5,14 +5,12 @@ import Loading from "../components/Loading";
 export default function Home() {
   const { currentUser, loading, authInitialized } = useAuth();
 
-  // Auth durumu yükleniyorsa loading göster
   if (loading || !authInitialized) {
     return <Loading message="Sayfa hazırlanıyor..." />;
   }
 
   return (
     <div style={{ backgroundColor: "#FFFFFF" }}>
-      {/* Hero */}
       <section
         className="py-16 md:py-24"
         style={{ backgroundColor: "#FFFFFF" }}
@@ -72,7 +70,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
       <section
         className="py-16"
         style={{ backgroundColor: "var(--color-card-bg)" }}
@@ -203,7 +200,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Call to Action */}
       <section
         className="py-16 text-white"
         style={{ backgroundColor: "var(--color-primary)" }}

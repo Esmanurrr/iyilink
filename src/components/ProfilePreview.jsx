@@ -3,11 +3,9 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const ProfilePreview = ({ getIconComponent }) => {
-  // Redux store'dan verileri al
   const { profile } = useSelector((state) => state.user);
   const { links } = useSelector((state) => state.links);
 
-  // Kullanıcı henüz giriş yapmamışsa veya profil yoksa
   if (!profile) {
     return (
       <div
@@ -33,17 +31,13 @@ const ProfilePreview = ({ getIconComponent }) => {
     );
   }
 
-  // Kullanıcı adını belirle
   const username =
     profile.username || profile.email?.split("@")[0]?.toLowerCase() || "";
 
-  // DEĞIŞIKLIK: displayName yerine username'i göster, "@" ile ön ek ekle
   const displayText = `@${username}`;
 
-  // Profil resmi için ilk harf - username'in ilk harfini kullanalım
   const firstLetter = (username || "?").charAt(0).toUpperCase();
 
-  // Tam profil URL'si
   const profileUrl = `${window.location.origin}/${username}`;
 
   return (
@@ -55,7 +49,7 @@ const ProfilePreview = ({ getIconComponent }) => {
         border: "1px solid var(--color-border)",
       }}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-4">
         <h2
           className="text-xl font-bold"
           style={{ color: "var(--color-dark-text)" }}
@@ -76,7 +70,6 @@ const ProfilePreview = ({ getIconComponent }) => {
         </Link>
       </div>
 
-      {/* URL gösterimi */}
       <div
         className="mb-4 p-2 flex items-center justify-between rounded text-sm"
         style={{
@@ -84,16 +77,21 @@ const ProfilePreview = ({ getIconComponent }) => {
           border: "1px solid var(--color-border)",
         }}
       >
-        <span style={{ color: "var(--color-light-text)" }}>{profileUrl}</span>
+        <span
+          className="truncate mr-2"
+          style={{ color: "var(--color-light-text)" }}
+          title={profileUrl}
+        >
+          {profileUrl}
+        </span>
         <button
-          className="ml-2 p-1 rounded-md"
+          className="flex-shrink-0 p-1 rounded-md"
           style={{
             backgroundColor: "var(--color-neutral-light)",
             color: "var(--color-dark-text)",
           }}
           onClick={() => {
             navigator.clipboard.writeText(profileUrl);
-            // İsteğe bağlı: kopyalandığına dair bir bildirim gösterilebilir
           }}
           title="Linki kopyala"
         >
@@ -113,7 +111,6 @@ const ProfilePreview = ({ getIconComponent }) => {
         </button>
       </div>
 
-      {/* Profil Önizleme Kartı */}
       <div
         className="border rounded-lg p-8 text-center"
         style={{

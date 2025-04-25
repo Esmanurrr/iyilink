@@ -32,7 +32,6 @@ export default function Signup() {
 
   const password = watch("password", "");
 
-  // Parola gücünü hesapla
   useEffect(() => {
     if (!password) {
       setPasswordStrength(0);
@@ -42,24 +41,18 @@ export default function Signup() {
 
     let strength = 0;
 
-    // Uzunluk kontrolü
     if (password.length >= 8) strength += 1;
 
-    // Büyük harf kontrolü
     if (/[A-Z]/.test(password)) strength += 1;
 
-    // Küçük harf kontrolü
     if (/[a-z]/.test(password)) strength += 1;
 
-    // Rakam kontrolü
     if (/[0-9]/.test(password)) strength += 1;
 
-    // Özel karakter kontrolü
     if (/[^A-Za-z0-9]/.test(password)) strength += 1;
 
     setPasswordStrength(strength);
 
-    // Parola gücüne göre metin belirle
     if (strength === 0) setStrengthText("");
     else if (strength <= 2) setStrengthText("Zayıf");
     else if (strength <= 3) setStrengthText("Orta");
@@ -67,7 +60,6 @@ export default function Signup() {
     else setStrengthText("Güçlü");
   }, [password]);
 
-  // Parola gücüne göre renk sınıfları
   const getStrengthColorClass = () => {
     if (passwordStrength <= 2) return "bg-red-500";
     if (passwordStrength <= 3) return "bg-yellow-500";
@@ -120,11 +112,10 @@ export default function Signup() {
     }
   };
 
-  // Google ile hesap oluşturma (aslında Google ile giriş ile aynı)
   const handleGoogleSignup = async () => {
     try {
       setError("");
-      await loginWithGoogle(); // Google ile oturum açınca, kullanıcı yoksa otomatik oluşturulur
+      await loginWithGoogle(); 
       navigate("/dashboard");
     } catch (error) {
       console.error("Google signup error:", error);
@@ -166,7 +157,6 @@ export default function Signup() {
           </div>
         )}
 
-        {/* Google ile Kaydol butonu ekle */}
         <button
           type="button"
           onClick={handleGoogleSignup}

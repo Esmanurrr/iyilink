@@ -9,11 +9,10 @@ const ProfileEdit = () => {
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.user);
 
-  // Modal durumunu kontrol etmek için state
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [originalUsername, setOriginalUsername] = useState("");
   const [imageError, setImageError] = useState(false);
-  const [photoType, setPhotoType] = useState("url"); // "url" veya "file" seçenekleri
+  const [photoType, setPhotoType] = useState("url");
   const [localImagePreview, setLocalImagePreview] = useState(null);
 
   const {
@@ -38,13 +37,11 @@ const ProfileEdit = () => {
   const watchedUsername = watch("username");
   const watchedPhotoURL = watch("photoURL");
 
-  // Component yüklendiğinde orijinal username'i kaydet
   useEffect(() => {
     if (profile?.username) {
       setOriginalUsername(profile.username);
     }
 
-    // Eğer profilde photoURL varsa, başlangıçta URL tipini seç
     if (profile?.photoURL && profile.photoURL.startsWith("http")) {
       setPhotoType("url");
     } else if (profile?.photoURL && profile.photoURL.startsWith("data:image")) {
@@ -53,17 +50,14 @@ const ProfileEdit = () => {
     }
   }, [profile]);
 
-  // Resim değiştiğinde hata durumunu sıfırla
   useEffect(() => {
     setImageError(false);
   }, [watchedPhotoURL]);
 
-  // Dosya yükleme işlemi
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        // 5MB kontrol
         setImageError(true);
         return;
       }
@@ -71,7 +65,7 @@ const ProfileEdit = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64Image = event.target.result;
-        setValue("photoURL", base64Image, { shouldDirty: true }); // Form değerine base64 veriyi ekle ve dirty olarak işaretle
+        setValue("photoURL", base64Image, { shouldDirty: true });
         setLocalImagePreview(base64Image);
         setImageError(false);
       };
@@ -82,21 +76,17 @@ const ProfileEdit = () => {
     }
   };
 
-  // Form gönderildiğinde ilk çalışacak fonksiyon - username kontrolü
   const onSubmit = (data) => {
     if (!isDirty) return;
 
-    // Username değişikliği var mı kontrol et
     if (data.username !== originalUsername) {
       setShowUsernameModal(true);
       return;
     }
 
-    // Username değişmemişse direkt kaydet
     saveProfileData(data);
   };
 
-  // Profil verilerini kaydeden asıl fonksiyon
   const saveProfileData = (data) => {
     dispatch(
       updateUserProfile({
@@ -106,7 +96,7 @@ const ProfileEdit = () => {
     )
       .unwrap()
       .then(() => {
-        reset(data); // Formu güncellenen değerlerle sıfırla
+        reset(data);
         if (data.username !== originalUsername) {
           setOriginalUsername(data.username);
         }
@@ -116,39 +106,32 @@ const ProfileEdit = () => {
       });
   };
 
-  // Username değişikliğini onayla
   const confirmUsernameChange = () => {
     const currentFormData = getValues();
     setShowUsernameModal(false);
     saveProfileData(currentFormData);
   };
 
-  // Username değişikliğini iptal et
   const cancelUsernameChange = () => {
     setShowUsernameModal(false);
   };
 
-  // Profil yüklenmediyse yükleniyor mesajı göster
   if (!profile) {
     return <div>Profil bilgileri yükleniyor...</div>;
   }
 
-  // Resim yüklenirken hata oluşursa hata durumunu güncelle
   const handleImageError = () => {
     setImageError(true);
   };
 
-  // Profil fotoğrafı seçim tipini değiştir
   const changePhotoType = (type) => {
     setPhotoType(type);
     if (type === "url") {
       setLocalImagePreview(null);
-      // Eğer URL tipine geçerken değer varsa, form değişikliği olarak işaretle
       if (profile?.photoURL !== watchedPhotoURL) {
         setValue("photoURL", watchedPhotoURL, { shouldDirty: true });
       }
     } else {
-      // Dosya tipine geçerken değeri sıfırla ve dirty olarak işaretle
       setValue("photoURL", "", { shouldDirty: true });
     }
     setImageError(false);
@@ -156,7 +139,6 @@ const ProfileEdit = () => {
 
   return (
     <div>
-      {/* Üst Navigasyon */}
       <div className="flex justify-end mb-4">
         <button
           onClick={() => navigate("/dashboard")}
@@ -191,7 +173,6 @@ const ProfileEdit = () => {
           border: "1px solid var(--color-border)",
         }}
       >
-        {/* Username değişikliği modal'ı */}
         {showUsernameModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div
@@ -376,7 +357,6 @@ const ProfileEdit = () => {
               Profil Fotoğrafı
             </label>
 
-            {/* Seçenek butonları */}
             <div className="flex space-x-4 mb-3">
               <button
                 type="button"

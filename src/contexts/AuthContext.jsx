@@ -37,7 +37,6 @@ export function AuthProvider({ children }) {
       setLoading(true);
       try {
         if (user) {
-          // Kullanıcı giriş yaptığında Firestore'dan profil bilgilerini al
           const userRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userRef);
 
@@ -60,7 +59,6 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, [dispatch]);
 
-  // Firebase auth yöntemleri
   const loginUser = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -77,7 +75,6 @@ export function AuthProvider({ children }) {
 
   const signupUser = async (email, password, name, surname, username) => {
     try {
-      // 1. Kullanıcı oluştur
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -85,12 +82,10 @@ export function AuthProvider({ children }) {
       );
       const user = userCredential.user;
 
-      // 2. Displayname güncelle
       await updateProfile(user, {
         displayName: `${name} ${surname}`,
       });
 
-      // 3. Firestore'a kullanıcı belgesi ekle
       const userRef = doc(db, "users", user.uid);
       const userData = {
         email,
@@ -115,19 +110,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Google ile giriş
   const loginWithGoogle = async () => {
     try {
-      // 1. Google pop-up ile giriş yap
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // 2. Firestore'dan kullanıcı bilgilerini kontrol et
       const userRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userRef);
 
-      // 3. Eğer kullanıcı daha önce kayıt olmamışsa, oluştur
       if (!userDoc.exists()) {
         const nameParts = user.displayName
           ? user.displayName.split(" ")
@@ -155,7 +146,6 @@ export function AuthProvider({ children }) {
         return { ...user, ...userData };
       }
 
-      // 4. Eğer kullanıcı zaten varsa, mevcut bilgileri döndür
       return { ...user, ...userDoc.data() };
     } catch (error) {
       console.error("Google login error:", error);
@@ -163,7 +153,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Şifre sıfırlama
   const resetUserPassword = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -174,7 +163,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Çıkış yapma
   const logoutUser = async () => {
     try {
       await signOut(auth);
@@ -204,7 +192,6 @@ export function AuthProvider({ children }) {
     login: (email, password) => {
       return loginUser(email, password)
         .then((user) => {
-          // Auth state change event'i Firestore verilerini yükleyecek
           return user;
         })
         .catch((error) => {
@@ -247,7 +234,6 @@ export function AuthProvider({ children }) {
     },
   };
 
-  // Tüm uygulama çapında auth yüklenirken loading ekranı göster
   if (loading && !authInitialized) {
     return <Loading message="Oturum bilgileri kontrol ediliyor..." />;
   }
