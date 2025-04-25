@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUsername } from "../redux/slices/userSlice";
@@ -38,7 +38,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
     try {
       // Redux thunk ile verileri çek
       await dispatch(fetchTotalViews(currentUser.uid));
-    } catch (error) {
+    } catch {
       // Hata durumunda sessizce devam et
     } finally {
       setRefreshing(false);
@@ -58,32 +58,32 @@ const ProfileStatisticsCard = ({ currentUser }) => {
     if (currentUser?.uid) {
       // Firestore belgesi için bir dinleyici ekle
       const userDocRef = doc(db, "users", currentUser.uid);
-
+      
       const unsubscribeListener = onSnapshot(
         userDocRef,
         (docSnapshot) => {
           if (docSnapshot.exists()) {
             const userData = docSnapshot.data();
             const currentMonth = new Date().toISOString().slice(0, 7);
-
+            
             const totalViews = userData.totalViews || 0;
             const monthlyStats = userData.monthlyStats || {};
             const monthlyViews = monthlyStats[currentMonth] || 0;
-
+            
             // Redux store'daki verileri güncelle
             if (totalViews !== total || monthlyViews !== monthly) {
               dispatch(fetchTotalViews(currentUser.uid));
             }
           }
         },
-        (error) => {
+        () => {
           // Hata durumunda sessizce devam et
         }
       );
-
+      
       // Unsubscribe fonksiyonunu state'e kaydet
       setUnsubscribe(() => unsubscribeListener);
-
+      
       // Component unmount olduğunda dinleyiciyi kaldır
       return () => {
         if (unsubscribe) {
@@ -92,11 +92,6 @@ const ProfileStatisticsCard = ({ currentUser }) => {
       };
     }
   }, [currentUser?.uid, dispatch, total, monthly]);
-
-  // Profil URL
-  const profileUrl = useMemo(() => {
-    return `${window.location.origin}/${username}`;
-  }, [username]);
 
   // Manuel yenileme
   const handleRefresh = () => {
