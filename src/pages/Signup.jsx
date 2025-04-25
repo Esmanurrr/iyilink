@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -8,6 +8,8 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [strengthText, setStrengthText] = useState("");
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.user);
   const { signup, loginWithGoogle } = useAuth();
@@ -27,6 +29,58 @@ export default function Signup() {
       passwordConfirm: "",
     },
   });
+
+  const password = watch("password", "");
+
+  // Parola gücünü hesapla
+  useEffect(() => {
+    if (!password) {
+      setPasswordStrength(0);
+      setStrengthText("");
+      return;
+    }
+
+    let strength = 0;
+
+    // Uzunluk kontrolü
+    if (password.length >= 8) strength += 1;
+
+    // Büyük harf kontrolü
+    if (/[A-Z]/.test(password)) strength += 1;
+
+    // Küçük harf kontrolü
+    if (/[a-z]/.test(password)) strength += 1;
+
+    // Rakam kontrolü
+    if (/[0-9]/.test(password)) strength += 1;
+
+    // Özel karakter kontrolü
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+    setPasswordStrength(strength);
+
+    // Parola gücüne göre metin belirle
+    if (strength === 0) setStrengthText("");
+    else if (strength <= 2) setStrengthText("Zayıf");
+    else if (strength <= 3) setStrengthText("Orta");
+    else if (strength <= 4) setStrengthText("İyi");
+    else setStrengthText("Güçlü");
+  }, [password]);
+
+  // Parola gücüne göre renk sınıfları
+  const getStrengthColorClass = () => {
+    if (passwordStrength <= 2) return "bg-red-500";
+    if (passwordStrength <= 3) return "bg-yellow-500";
+    if (passwordStrength <= 4) return "bg-blue-500";
+    return "bg-green-500";
+  };
+
+  const getStrengthTextColorClass = () => {
+    if (passwordStrength <= 2) return "text-red-500";
+    if (passwordStrength <= 3) return "text-yellow-500";
+    if (passwordStrength <= 4) return "text-blue-500";
+    return "text-green-500";
+  };
 
   const onSubmit = async (data) => {
     if (data.password !== data.passwordConfirm) {
@@ -258,8 +312,19 @@ export default function Signup() {
                 {...register("password", {
                   required: "Şifre alanı zorunludur",
                   minLength: {
-                    value: 6,
-                    message: "Şifre en az 6 karakter olmalıdır",
+                    value: 8,
+                    message: "Şifre en az 8 karakter olmalıdır",
+                  },
+                  validate: {
+                    hasUpperCase: (value) =>
+                      /[A-Z]/.test(value) || "En az bir büyük harf içermelidir",
+                    hasLowerCase: (value) =>
+                      /[a-z]/.test(value) || "En az bir küçük harf içermelidir",
+                    hasNumber: (value) =>
+                      /[0-9]/.test(value) || "En az bir rakam içermelidir",
+                    hasSpecialChar: (value) =>
+                      /[^A-Za-z0-9]/.test(value) ||
+                      "En az bir özel karakter içermelidir (!, @, #, $ vb.)",
                   },
                 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -305,9 +370,48 @@ export default function Signup() {
                 {errors.password.message}
               </span>
             )}
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              En az 6 karakter olmalıdır
-            </p>
+
+            {/* Parola gücü göstergesi */}
+            {password.length > 0 && (
+              <div className="mt-2">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${getStrengthColorClass()}`}
+                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                  ></div>
+                </div>
+                <p className={`text-xs mt-1 ${getStrengthTextColorClass()}`}>
+                  {strengthText}
+                </p>
+                <ul className="mt-2 text-xs text-gray-600 dark:text-gray-400 list-disc pl-5">
+                  <li className={password.length >= 8 ? "text-green-500" : ""}>
+                    En az 8 karakter
+                  </li>
+                  <li
+                    className={/[A-Z]/.test(password) ? "text-green-500" : ""}
+                  >
+                    En az bir büyük harf (A-Z)
+                  </li>
+                  <li
+                    className={/[a-z]/.test(password) ? "text-green-500" : ""}
+                  >
+                    En az bir küçük harf (a-z)
+                  </li>
+                  <li
+                    className={/[0-9]/.test(password) ? "text-green-500" : ""}
+                  >
+                    En az bir rakam (0-9)
+                  </li>
+                  <li
+                    className={
+                      /[^A-Za-z0-9]/.test(password) ? "text-green-500" : ""
+                    }
+                  >
+                    En az bir özel karakter (!, @, #, $ vb.)
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="mb-6">

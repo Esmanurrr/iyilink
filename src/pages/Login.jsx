@@ -14,6 +14,16 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (!email.trim()) {
+      setError("Lütfen email adresinizi girin");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Lütfen şifrenizi girin");
+      return;
+    }
+
     try {
       setError("");
       setLoading(true);
@@ -35,6 +45,10 @@ export default function Login() {
         setError(
           "Geçersiz kimlik bilgileri. Lütfen email ve şifrenizi kontrol edin."
         );
+      } else if (error.code === "auth/missing-password") {
+        setError("Lütfen şifrenizi girin");
+      } else if (error.code === "auth/invalid-login-credentials") {
+        setError("Email adresi veya şifre hatalı");
       } else {
         setError(
           "Giriş yapılamadı: " + (error.message || "Lütfen tekrar deneyin.")
