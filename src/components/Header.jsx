@@ -38,11 +38,11 @@ export default function Header() {
                 <>
                   <li>
                     <Link
-                      to="/profile"
+                      to="/dashboard"
                       className="hover:opacity-80 transition-all duration-300"
                       style={{ color: "#ECFFE6" }}
                     >
-                      Profil
+                      Dashboard
                     </Link>
                   </li>
                   <li>
