@@ -1,33 +1,31 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.user);
   const { login, loginWithGoogle } = useAuth();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    if (!email.trim()) {
-      setError("Lütfen email adresinizi girin");
-      return;
-    }
-
-    if (!password.trim()) {
-      setError("Lütfen şifrenizi girin");
-      return;
-    }
-
+  const onSubmit = async (data) => {
     try {
       setError("");
-      setLoading(true);
-      await login(email, password);
+      await login(data.email, data.password);
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
@@ -54,15 +52,12 @@ export default function Login() {
           "Giriş yapılamadı: " + (error.message || "Lütfen tekrar deneyin.")
         );
       }
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
-  async function handleGoogleLogin() {
+  const handleGoogleLogin = async () => {
     try {
       setError("");
-      setLoading(true);
       await loginWithGoogle();
       navigate("/dashboard");
     } catch (error) {
@@ -81,10 +76,8 @@ export default function Login() {
             (error.message || "Lütfen tekrar deneyin.")
         );
       }
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -127,7 +120,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -138,11 +131,20 @@ export default function Login() {
             <input
               type="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email", {
+                required: "Email alanı zorunludur",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Geçerli bir email adresi giriniz",
+                },
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              required
             />
+            {errors.email && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           <div className="mb-6">
@@ -156,10 +158,10 @@ export default function Login() {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password", {
+                  required: "Şifre alanı zorunludur",
+                })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
               />
               <button
                 type="button"
@@ -197,6 +199,11 @@ export default function Login() {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.password.message}
+              </span>
+            )}
           </div>
 
           <button
