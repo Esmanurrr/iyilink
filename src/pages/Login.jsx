@@ -224,15 +224,6 @@ export default function Login() {
         </form>
 
         <div className="mt-4 text-center">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-          >
-            Şifremi Unuttum
-          </Link>
-        </div>
-
-        <div className="mt-4 text-center">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Hesabınız yok mu?{" "}
             <Link

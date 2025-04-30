@@ -72,7 +72,6 @@ export const router = createBrowserRouter([
       { path: "faq", element: <FAQ /> },
     ],
   },
-
   {
     path: "/:username",
     element: <MinimalLayout />,
@@ -81,7 +80,8 @@ export const router = createBrowserRouter([
         index: true,
         element: <PublicProfile />,
         loader: ({ params }) => {
-          if (RESERVED_ROUTES.includes(params.username)) {
+          const username = params.username?.toLowerCase();
+          if (RESERVED_ROUTES.includes(username)) {
             throw new Response("", {
               status: 302,
               headers: { Location: "/" },
