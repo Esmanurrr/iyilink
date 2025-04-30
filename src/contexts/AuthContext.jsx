@@ -8,6 +8,7 @@ import {
   updateProfile,
   signOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
@@ -85,6 +86,8 @@ export function AuthProvider({ children }) {
       await updateProfile(user, {
         displayName: `${name} ${surname}`,
       });
+
+      await sendEmailVerification(user);
 
       const userRef = doc(db, "users", user.uid);
       const userData = {
@@ -178,6 +181,19 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!profile,
     loading: loading || reduxLoading,
     authInitialized,
+    isEmailVerified: profile?.emailVerified || false,
+    sendVerificationEmail: async () => {
+      if (auth.currentUser) {
+        try {
+          await sendEmailVerification(auth.currentUser);
+          return true;
+        } catch (error) {
+          console.error("Email verification error:", error);
+          throw error;
+        }
+      }
+      throw new Error("No user is currently signed in");
+    },
     signup: (email, password, name, surname, username) => {
       return signupUser(email, password, name, surname, username)
         .then((userData) => {
