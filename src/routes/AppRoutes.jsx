@@ -11,6 +11,9 @@ import Contact from "../pages/Contact";
 import Terms from "../pages/Terms";
 import Privacy from "../pages/Privacy";
 import FAQ from "../pages/FAQ";
+import ForgotPassword from "../components/ForgotPassword";
+import EmailVerification from "../components/EmailVerification";
+import AuthAction from "../components/AuthAction";
 import { AuthProvider } from "../contexts/AuthContext";
 
 const MainLayout = () => (
@@ -44,6 +47,9 @@ const RESERVED_ROUTES = [
   "terms",
   "privacy",
   "faq",
+  "forgot-password",
+  "verify-email",
+  "auth",
 ];
 
 export const router = createBrowserRouter([
@@ -56,6 +62,9 @@ export const router = createBrowserRouter([
       { path: "signup", element: <Signup /> },
       { path: "dashboard", element: <Dashboard /> },
       { path: "profile/edit", element: <ProfileEdit /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "verify-email", element: <EmailVerification /> },
+      { path: "auth/action", element: <AuthAction /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "terms", element: <Terms /> },

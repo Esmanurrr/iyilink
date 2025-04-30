@@ -204,6 +204,14 @@ export default function Login() {
                 {errors.password.message}
               </span>
             )}
+            <div className="mt-2 text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Şifremi Unuttum
+              </Link>
+            </div>
           </div>
 
           <button
