@@ -19,6 +19,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Configure Auth settings
+auth.useDeviceLanguage(); // Tarayıcı diline göre e-posta şablonlarını ayarla
+auth.config.authDomain = firebaseConfig.authDomain;
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 const analytics = getAnalytics(app);
