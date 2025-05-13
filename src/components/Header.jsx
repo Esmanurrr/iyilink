@@ -1,18 +1,14 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-
+import logo from "/acik-renk-logo.png";
 export default function Header() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
   async function handleLogout() {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    await logout();
+    navigate("/login");
   }
 
   return (
@@ -30,7 +26,7 @@ export default function Header() {
             className="text-2xl font-bold transition-all duration-300 hover:opacity-80"
             style={{ color: "#ECFFE6" }}
           >
-            İyilink
+            <img src={logo} alt="logo" className="w-24 h-full" />
           </Link>
           <nav>
             <ul className="flex space-x-6">
@@ -61,7 +57,7 @@ export default function Header() {
                     <Link
                       to="/login"
                       className="hover:opacity-80 transition-all duration-300"
-                      style={{ color: "#34a853" }}
+                      style={{ color: "#e7f5e2" }}
                     >
                       Giriş Yap
                     </Link>

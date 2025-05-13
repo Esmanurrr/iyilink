@@ -20,7 +20,6 @@ export default function ForgotPassword() {
       setMessage("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi!");
     } catch (error) {
       setError("Şifre sıfırlama işlemi başarısız oldu. Lütfen tekrar deneyin.");
-      console.error("Password reset error:", error);
     }
     setLoading(false);
   }

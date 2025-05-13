@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "/koyu-renk-logo.png";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -19,7 +20,7 @@ export default function Footer() {
                 className="self-center text-2xl font-semibold transition-all hover:opacity-90"
                 style={{ color: "var(--color-primary)" }}
               >
-                İyiLink
+                <img src={logo} alt="İyilink Logo" className="w-24 h-full" />
               </span>
             </Link>
             <p
@@ -112,7 +113,7 @@ export default function Footer() {
               className="hover:underline"
               style={{ color: "var(--color-link)" }}
             >
-              İyiLink
+              İyilink
             </Link>
             . Tüm hakları saklıdır.
           </span>

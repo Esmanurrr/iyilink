@@ -28,7 +28,6 @@ export default function Login() {
       await login(data.email, data.password);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
       if (error.code === "auth/user-not-found") {
         setError("Bu email adresi ile kayıtlı kullanıcı bulunamadı");
       } else if (error.code === "auth/wrong-password") {
@@ -61,7 +60,6 @@ export default function Login() {
       await loginWithGoogle();
       navigate("/dashboard");
     } catch (error) {
-      console.error("Google login error:", error);
       if (error.code === "auth/popup-closed-by-user") {
         setError("Google ile giriş işlemi iptal edildi.");
       } else if (error.code === "auth/cancelled-popup-request") {

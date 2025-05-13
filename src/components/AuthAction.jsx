@@ -47,7 +47,6 @@ export default function AuthAction() {
             setError("Desteklenmeyen işlem türü.");
         }
       } catch (error) {
-        console.error("Auth action error:", error);
         switch (error.code) {
           case "auth/expired-action-code":
             setError(
@@ -91,7 +90,6 @@ export default function AuthAction() {
       setSuccess("Şifreniz başarıyla güncellendi!");
       setTimeout(() => navigate("/login"), 3000);
     } catch (error) {
-      console.error("Password reset error:", error);
       setError("Şifre güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setLoading(false);

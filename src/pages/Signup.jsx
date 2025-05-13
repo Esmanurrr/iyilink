@@ -91,7 +91,6 @@ export default function Signup() {
       );
       navigate("/dashboard");
     } catch (error) {
-      console.error("Signup error:", error);
       if (error.code === "auth/email-already-in-use") {
         setError("Bu email adresi zaten kullanımda");
       } else if (error.code === "auth/weak-password") {
@@ -115,10 +114,9 @@ export default function Signup() {
   const handleGoogleSignup = async () => {
     try {
       setError("");
-      await loginWithGoogle(); 
+      await loginWithGoogle();
       navigate("/dashboard");
     } catch (error) {
-      console.error("Google signup error:", error);
       if (error.code === "auth/popup-closed-by-user") {
         setError("Google ile kayıt işlemi iptal edildi.");
       } else if (error.code === "auth/cancelled-popup-request") {

@@ -111,7 +111,8 @@ const PublicProfile = () => {
         {!isLoading && publicProfile && (
           <>
             <div className="text-center mb-8 bg-[color:var(--color-highlight)] p-6 rounded-lg border border-[color:var(--color-border)]">
-              {publicProfile.photoURL ? (
+              {publicProfile.photoURL &&
+              publicProfile.photoURL.trim() !== "" ? (
                 <img
                   src={publicProfile.photoURL}
                   alt={displayName}

@@ -29,7 +29,6 @@ export default function EmailVerification() {
       setError(
         "Doğrulama e-postası gönderilirken bir hata oluştu. Lütfen tekrar deneyin."
       );
-      console.error("Email verification error:", error);
     }
     setLoading(false);
   }

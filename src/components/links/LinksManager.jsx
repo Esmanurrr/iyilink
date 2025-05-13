@@ -32,7 +32,6 @@ const LinksManager = ({ getIconComponent }) => {
 
   useEffect(() => {
     if (profile?.uid) {
-      console.log("Fetching links for user:", profile.uid);
       dispatch(fetchLinks(profile.uid));
     }
   }, [dispatch, profile]);
@@ -57,11 +56,8 @@ const LinksManager = ({ getIconComponent }) => {
         icon: newLink.icon,
       };
 
-      console.log("Creating link for user:", profile.uid, linkData);
       await dispatch(createLink({ userId: profile.uid, linkData })).unwrap();
-    } catch (error) {
-      console.error("Link ekleme hatası:", error);
-    }
+    } catch (error) {}
   };
 
   const handleEditLink = (linkId) => {
@@ -98,9 +94,7 @@ const LinksManager = ({ getIconComponent }) => {
           linkData,
         })
       ).unwrap();
-    } catch (error) {
-      console.error("Link güncelleme hatası:", error);
-    }
+    } catch (error) {}
   };
 
   const handleCancelEdit = () => {
@@ -115,9 +109,7 @@ const LinksManager = ({ getIconComponent }) => {
 
     try {
       await dispatch(deleteLinkById({ userId: profile.uid, linkId })).unwrap();
-    } catch (error) {
-      console.error("Link silme hatası:", error);
-    }
+    } catch (error) {}
   };
 
   const handleFieldChange = (field, value) => {

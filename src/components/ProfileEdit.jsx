@@ -101,9 +101,7 @@ const ProfileEdit = () => {
           setOriginalUsername(data.username);
         }
       })
-      .catch((error) => {
-        console.error("Profil güncellenirken hata oluştu:", error);
-      });
+      .catch((error) => {});
   };
 
   const confirmUsernameChange = () => {
