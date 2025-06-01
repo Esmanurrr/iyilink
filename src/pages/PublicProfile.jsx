@@ -9,6 +9,10 @@ import {
 } from "../redux/slices/userSlice";
 import { clearLinks, fetchLinksByUserId } from "../redux/slices/linksSlice";
 import { incrementProfileView } from "../redux/slices/statsSlice";
+import {
+  getResponsiveFontSize,
+  getResponsiveTextClasses,
+} from "../utils/textUtils";
 
 const LinkIcon = () => (
   <svg
@@ -123,11 +127,20 @@ const PublicProfile = () => {
                   {firstLetter}
                 </div>
               )}
-              <h1 className="text-xl font-bold mb-2 text-[color:var(--color-dark-text)]">
+              <h1
+                className={`font-bold mb-2 text-[color:var(--color-dark-text)] truncate px-2 ${getResponsiveTextClasses(
+                  displayName
+                )}`}
+                style={{
+                  fontSize: getResponsiveFontSize(displayName, 1.25),
+                  lineHeight: "1.2",
+                }}
+                title={`@${publicProfile.username}`}
+              >
                 @{publicProfile.username}
               </h1>
               {publicProfile.bio && (
-                <p className="mb-3 text-[color:var(--color-light-text)]">
+                <p className="mb-3 text-[color:var(--color-light-text)] px-2 text-sm sm:text-base">
                   {publicProfile.bio}
                 </p>
               )}

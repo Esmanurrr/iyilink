@@ -5,6 +5,11 @@ import { selectUsername } from "../redux/slices/userSlice";
 import { fetchTotalViews } from "../redux/slices/statsSlice";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
+import {
+  getResponsiveFontSize,
+  truncateUsername,
+  getResponsiveTextClasses,
+} from "../utils/textUtils";
 
 const ProfileStatisticsCard = ({ currentUser }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -87,6 +92,13 @@ const ProfileStatisticsCard = ({ currentUser }) => {
     return new Date().toLocaleTimeString();
   };
 
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(`iyilink.co/${username}`);
+    } catch (err) {
+    }
+  };
+
   return (
     <div
       className="rounded-xl p-6 mb-8"
@@ -97,22 +109,35 @@ const ProfileStatisticsCard = ({ currentUser }) => {
       }}
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
+        <div className="min-w-0 flex-1">
           <h1
-            className="text-2xl font-bold mb-1"
-            style={{ color: "var(--color-dark-text)" }}
+            className={`font-bold mb-1 truncate ${getResponsiveTextClasses(
+              username
+            )}`}
+            style={{
+              color: "var(--color-dark-text)",
+              fontSize: getResponsiveFontSize(username, 1.5),
+              lineHeight: "1.2",
+            }}
+            title={`@${username}`}
           >
             @{username}
           </h1>
-          <div className="flex items-center">
+          <div className="flex items-center min-w-0">
             <p
-              className="truncate"
+              className="truncate flex-1 text-sm sm:text-base"
               style={{ color: "var(--color-light-text)" }}
+              title={`iyilink.co/${username}`}
             >
-              iyilink.co/{username}
+              <span className="hidden sm:inline">iyilink.co/</span>
+              <span className="sm:hidden">iyilink.co/</span>
+              <span className="font-medium">
+                {truncateUsername(username, 15)}
+              </span>
             </p>
             <button
-              className="ml-2 text-sm p-1 rounded-md flex-shrink-0"
+              onClick={handleCopyToClipboard}
+              className="ml-2 text-sm p-1 rounded-md flex-shrink-0 hover:bg-opacity-80 transition-colors"
               style={{
                 backgroundColor: "var(--color-neutral-light)",
                 color: "var(--color-dark-text)",
@@ -142,7 +167,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto flex-shrink-0">
           <button
             onClick={handleRefresh}
             disabled={loading || refreshing}

@@ -169,3 +169,62 @@ body {
     user-select: none;
   }
 }
+
+/* Responsive Text Utilities */
+.responsive-username {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Container overflow handling */
+.text-container {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.text-container h1,
+.text-container h2,
+.text-container h3 {
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Responsive font sizes for different screen sizes */
+@media (max-width: 640px) {
+  .username-display {
+    font-size: clamp(0.875rem, 4vw, 1.25rem);
+  }
+
+  .username-url {
+    font-size: clamp(0.75rem, 3vw, 0.875rem);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .username-display {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+  }
+}
+
+/* Utility for long text handling */
+.long-text-handler {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Improved flex container for username sections */
+.username-section {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.username-section > * {
+  min-width: 0;
+}

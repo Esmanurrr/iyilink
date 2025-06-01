@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { getResponsiveFontSize, truncateUsername } from "../utils/textUtils";
 
 const ProfilePreview = ({ getIconComponent }) => {
   const { profile } = useSelector((state) => state.user);
@@ -40,6 +41,12 @@ const ProfilePreview = ({ getIconComponent }) => {
 
   const profileUrl = `${window.location.origin}/${username}`;
 
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+    } catch (err) {}
+  };
+
   return (
     <div
       className="rounded-xl p-6 sticky top-4 h-full"
@@ -59,7 +66,7 @@ const ProfilePreview = ({ getIconComponent }) => {
         <Link
           to={`/${username}`}
           target="_blank"
-          className="text-sm px-2 py-1 rounded"
+          className="text-sm px-2 py-1 rounded flex-shrink-0"
           style={{
             backgroundColor: "var(--color-accent)",
             color: "var(--color-dark-text)",
@@ -71,28 +78,29 @@ const ProfilePreview = ({ getIconComponent }) => {
       </div>
 
       <div
-        className="mb-4 p-2 flex items-center justify-between rounded text-sm"
+        className="mb-4 p-2 flex items-center justify-between rounded text-sm min-w-0"
         style={{
           backgroundColor: "var(--color-highlight)",
           border: "1px solid var(--color-border)",
         }}
       >
         <span
-          className="truncate mr-2"
+          className="truncate mr-2 flex-1"
           style={{ color: "var(--color-light-text)" }}
           title={profileUrl}
         >
-          {profileUrl}
+          <span className="hidden sm:inline">{profileUrl}</span>
+          <span className="sm:hidden">
+            iyilink.co/{truncateUsername(username, 12)}
+          </span>
         </span>
         <button
-          className="flex-shrink-0 p-1 rounded-md"
+          className="flex-shrink-0 p-1 rounded-md hover:bg-opacity-80 transition-colors"
           style={{
             backgroundColor: "var(--color-neutral-light)",
             color: "var(--color-dark-text)",
           }}
-          onClick={() => {
-            navigator.clipboard.writeText(profileUrl);
-          }}
+          onClick={handleCopyToClipboard}
           title="Linki kopyala"
         >
           <svg
@@ -144,13 +152,18 @@ const ProfilePreview = ({ getIconComponent }) => {
           </div>
         )}
         <h3
-          className="text-lg font-medium mb-1"
-          style={{ color: "var(--color-dark-text)" }}
+          className="font-medium mb-1 truncate px-2"
+          style={{
+            color: "var(--color-dark-text)",
+            fontSize: getResponsiveFontSize(displayText, 1.125),
+            lineHeight: "1.3",
+          }}
+          title={displayText}
         >
           {displayText}
         </h3>
         <p
-          className="mb-6 text-sm"
+          className="mb-6 text-sm px-2"
           style={{ color: "var(--color-light-text)" }}
         >
           {profile.bio || "Sosyal medya hesaplarım ve kişisel linklerim"}
