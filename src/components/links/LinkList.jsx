@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
+  DragOverlay,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -36,6 +38,7 @@ const LinkList = ({
 }) => {
   const dispatch = useDispatch();
   const { profile: userProfile } = useSelector((state) => state.user);
+  const [activeId, setActiveId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -43,13 +46,24 @@ const LinkList = ({
         distance: 8,
       },
     }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
+    setActiveId(null);
 
     if (active.id !== over?.id) {
       const oldIndex = links.findIndex((link) => link.id === active.id);
@@ -70,6 +84,10 @@ const LinkList = ({
         }
       }
     }
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   if (!profile?.uid) {
@@ -141,7 +159,9 @@ const LinkList = ({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
         modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
       >
         <SortableContext
@@ -160,6 +180,21 @@ const LinkList = ({
             />
           ))}
         </SortableContext>
+
+        <DragOverlay>
+          {activeId ? (
+            <div className="dragging-overlay">
+              <LinkItem
+                link={links.find((link) => link.id === activeId)}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                loading={false}
+                isEditingMode={false}
+                getIconComponent={getIconComponent}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );

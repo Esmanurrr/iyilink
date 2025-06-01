@@ -50,7 +50,9 @@ const LinkItem = ({
   return (
     <div
       ref={setNodeRef}
-      className="p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-4 gap-3"
+      className={`p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-4 gap-3 sortable-item ${
+        isDragging ? "is-dragging" : ""
+      }`}
       style={{
         ...style,
         backgroundColor: "var(--color-neutral-light)",
@@ -65,15 +67,16 @@ const LinkItem = ({
         <div
           {...attributes}
           {...listeners}
-          className="w-6 h-6 mr-2 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0"
+          className="w-6 h-6 sm:w-8 sm:h-8 mr-2 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0 touch-none drag-handle"
           style={{
             color: "var(--color-light-text)",
             opacity: isDragging ? 0.5 : 0.6,
+            touchAction: "none",
           }}
           title="Sürükleyerek sırayı değiştir"
         >
           <svg
-            className="w-4 h-4"
+            className="w-4 h-4 sm:w-5 sm:h-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

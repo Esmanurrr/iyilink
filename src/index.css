@@ -120,3 +120,52 @@ body {
 }
 
 /* Tailwind dışında özel stiller için burası kullanılabilir */
+
+/* Drag and Drop - Touch Support */
+.touch-none {
+  touch-action: none;
+}
+
+/* Drag and drop için dokunmatik cihaz optimizasyonları */
+@media (pointer: coarse) {
+  /* Dokunmatik cihazlarda drag handle'ları daha büyük yap */
+  .drag-handle {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  /* Dokunmatik cihazlarda aktif durumda farklı stil */
+  .drag-handle:active {
+    background-color: var(--color-overlay);
+    border-radius: var(--border-radius-md);
+  }
+}
+
+/* DndKit overlays ve dragging states için */
+.dragging-overlay {
+  opacity: 0.8;
+  transform: rotate(5deg);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-card-bg);
+  border: 2px solid var(--color-primary);
+}
+
+/* Sortable item'lar için */
+.sortable-item {
+  transition: transform var(--transition-normal);
+}
+
+.sortable-item.is-dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+}
+
+/* Mobile webkit optimizasyonları */
+@supports (-webkit-touch-callout: none) {
+  .drag-handle {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
