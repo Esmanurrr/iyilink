@@ -647,7 +647,7 @@ export const linksSlice = createSlice({
             .sort((a, b) => (a.order || 0) - (b.order || 0));
         }
       })
-      .addCase(migrateLinksOrder.rejected, (state, action) => {})
+      .addCase(migrateLinksOrder.rejected, () => {})
 
       .addCase(reorderLinks.pending, () => {})
       .addCase(reorderLinks.fulfilled, (state, action) => {
