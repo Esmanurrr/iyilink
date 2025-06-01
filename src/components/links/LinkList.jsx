@@ -1,4 +1,27 @@
 import React from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  restrictToVerticalAxis,
+  restrictToFirstScrollableAncestor,
+} from "@dnd-kit/modifiers";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  reorderLinks,
+  reorderLinksLocally,
+} from "../../redux/slices/linksSlice";
 import LinkItem from "./LinkItem";
 
 const LinkList = ({
@@ -11,6 +34,44 @@ const LinkList = ({
   onAdd,
   getIconComponent,
 }) => {
+  const dispatch = useDispatch();
+  const { profile: userProfile } = useSelector((state) => state.user);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = links.findIndex((link) => link.id === active.id);
+      const newIndex = links.findIndex((link) => link.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedLinks = arrayMove(links, oldIndex, newIndex);
+
+        dispatch(reorderLinksLocally(reorderedLinks));
+
+        if (userProfile?.uid) {
+          dispatch(
+            reorderLinks({
+              userId: userProfile.uid,
+              reorderedLinks,
+            })
+          );
+        }
+      }
+    }
+  };
+
   if (!profile?.uid) {
     return (
       <div className="text-center py-8">
@@ -77,17 +138,29 @@ const LinkList = ({
       className="space-y-4 overflow-y-auto"
       style={{ maxHeight: "calc(100vh - 400px)" }}
     >
-      {links.map((link) => (
-        <LinkItem
-          key={link.id}
-          link={link}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          loading={loading}
-          isEditingMode={isEditingLink}
-          getIconComponent={getIconComponent}
-        />
-      ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+      >
+        <SortableContext
+          items={links.map((link) => link.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {links.map((link) => (
+            <LinkItem
+              key={link.id}
+              link={link}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              loading={loading}
+              isEditingMode={isEditingLink}
+              getIconComponent={getIconComponent}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

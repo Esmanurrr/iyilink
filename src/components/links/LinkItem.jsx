@@ -1,4 +1,6 @@
 import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const LinkItem = ({
   link,
@@ -8,6 +10,21 @@ const LinkItem = ({
   isEditingMode,
   getIconComponent,
 }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
   const shortenUrl = (url) => {
     try {
       const urlObj = new URL(url);
@@ -32,15 +49,44 @@ const LinkItem = ({
 
   return (
     <div
+      ref={setNodeRef}
       className="p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-4 gap-3"
       style={{
+        ...style,
         backgroundColor: "var(--color-neutral-light)",
         borderLeftColor: "var(--color-primary)",
         borderColor: "var(--color-border)",
-        boxShadow: "0 2px 4px var(--color-shadow)",
+        boxShadow: isDragging
+          ? "0 8px 20px var(--color-shadow)"
+          : "0 2px 4px var(--color-shadow)",
       }}
     >
       <div className="flex items-center w-full sm:w-auto">
+        <div
+          {...attributes}
+          {...listeners}
+          className="w-6 h-6 mr-2 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0"
+          style={{
+            color: "var(--color-light-text)",
+            opacity: isDragging ? 0.5 : 0.6,
+          }}
+          title="Sürükleyerek sırayı değiştir"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8h16M4 16h16"
+            />
+          </svg>
+        </div>
+
         <div
           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0"
           style={{

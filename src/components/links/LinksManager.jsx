@@ -11,6 +11,7 @@ import {
   startEditingLink,
   stopEditingLink,
   updateEditingLinkField,
+  migrateLinksOrder,
 } from "../../redux/slices/linksSlice";
 
 import LinkList from "./LinkList";
@@ -32,7 +33,17 @@ const LinksManager = ({ getIconComponent }) => {
 
   useEffect(() => {
     if (profile?.uid) {
-      dispatch(fetchLinks(profile.uid));
+      dispatch(fetchLinks(profile.uid)).then((result) => {
+        if (result.type === "links/fetchLinks/fulfilled") {
+          const linksWithoutOrder = result.payload.filter(
+            (link) => link.order === undefined || link.order === null
+          );
+
+          if (linksWithoutOrder.length > 0) {
+            dispatch(migrateLinksOrder(profile.uid));
+          }
+        }
+      });
     }
   }, [dispatch, profile]);
 

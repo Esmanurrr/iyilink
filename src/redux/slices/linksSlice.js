@@ -11,6 +11,8 @@ import {
   query,
   where,
   increment,
+  writeBatch,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -21,7 +23,8 @@ export const fetchLinks = createAsyncThunk(
       if (!userId) return rejectWithValue("User ID is required");
 
       const linksCollectionRef = collection(db, "users", userId, "links");
-      const querySnapshot = await getDocs(linksCollectionRef);
+      const q = query(linksCollectionRef, orderBy("order", "asc"));
+      const querySnapshot = await getDocs(q);
 
       const links = [];
       querySnapshot.forEach((doc) => {
@@ -38,6 +41,7 @@ export const fetchLinks = createAsyncThunk(
           ...data,
           createdAt,
           updatedAt,
+          order: data.order ?? 0,
         });
       });
 
@@ -98,7 +102,11 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
       const userId = userDoc.id;
 
       const userLinksCollection = collection(db, "users", userId, "links");
-      const userLinksSnapshot = await getDocs(userLinksCollection);
+      const userLinksQuery = query(
+        userLinksCollection,
+        orderBy("order", "asc")
+      );
+      const userLinksSnapshot = await getDocs(userLinksQuery);
 
       if (!userLinksSnapshot.empty) {
         const links = [];
@@ -106,6 +114,7 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
           links.push({
             id: doc.id,
             ...doc.data(),
+            order: doc.data().order ?? 0,
           });
         });
 
@@ -114,7 +123,8 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
 
       const linksQuery = query(
         collection(db, "links"),
-        where("userId", "==", userId)
+        where("userId", "==", userId),
+        orderBy("order", "asc")
       );
 
       const querySnapshot = await getDocs(linksQuery);
@@ -127,6 +137,7 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
         links.push({
           id: doc.id,
           ...doc.data(),
+          order: doc.data().order ?? 0,
         });
       });
 
@@ -192,18 +203,23 @@ export const fetchLinkById = createAsyncThunk(
 
 export const createLink = createAsyncThunk(
   "links/createLink",
-  async ({ userId, linkData }, { rejectWithValue }) => {
+  async ({ userId, linkData }, { rejectWithValue, getState }) => {
     try {
       if (!userId) return rejectWithValue("User ID is required");
 
       const userDocRef = doc(db, "users", userId);
       const linksCollectionRef = collection(userDocRef, "links");
 
+      const state = getState();
+      const currentLinks = state.links.links;
+      const nextOrder = currentLinks.length;
+
       const newLink = {
         title: linkData.title || "",
         url: linkData.url || "",
         icon: linkData.icon || "link",
         clicks: 0,
+        order: nextOrder,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -283,12 +299,14 @@ export const fetchLinksByUserId = createAsyncThunk(
       if (!userId) return rejectWithValue("Kullanıcı ID'si gereklidir");
 
       const userLinksRef = collection(db, "users", userId, "links");
-      const linksSnapshot = await getDocs(userLinksRef);
+      const q = query(userLinksRef, orderBy("order", "asc"));
+      const linksSnapshot = await getDocs(q);
 
       if (!linksSnapshot.empty) {
         const links = linksSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
+          order: doc.data().order ?? 0,
         }));
 
         return links;
@@ -296,7 +314,8 @@ export const fetchLinksByUserId = createAsyncThunk(
 
       const linksQuery = query(
         collection(db, "links"),
-        where("userId", "==", userId)
+        where("userId", "==", userId),
+        orderBy("order", "asc")
       );
       const querySnapshot = await getDocs(linksQuery);
 
@@ -307,9 +326,83 @@ export const fetchLinksByUserId = createAsyncThunk(
       const links = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        order: doc.data().order ?? 0,
       }));
 
       return links;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const reorderLinks = createAsyncThunk(
+  "links/reorderLinks",
+  async ({ userId, reorderedLinks }, { rejectWithValue }) => {
+    try {
+      if (!userId) return rejectWithValue("User ID is required");
+      if (!reorderedLinks || !Array.isArray(reorderedLinks)) {
+        return rejectWithValue("Invalid reordered links data");
+      }
+
+      const batch = writeBatch(db);
+
+      reorderedLinks.forEach((link, index) => {
+        const linkRef = doc(db, "users", userId, "links", link.id);
+        batch.update(linkRef, {
+          order: index,
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      await batch.commit();
+
+      return reorderedLinks.map((link, index) => ({
+        ...link,
+        order: index,
+        updatedAt: new Date(),
+      }));
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const migrateLinksOrder = createAsyncThunk(
+  "links/migrateLinksOrder",
+  async (userId, { rejectWithValue }) => {
+    try {
+      if (!userId) return rejectWithValue("User ID is required");
+
+      const linksCollectionRef = collection(db, "users", userId, "links");
+      const querySnapshot = await getDocs(linksCollectionRef);
+
+      if (querySnapshot.empty) return [];
+
+      const batch = writeBatch(db);
+      const linksToUpdate = [];
+
+      querySnapshot.forEach((doc, index) => {
+        const data = doc.data();
+        if (data.order === undefined || data.order === null) {
+          const linkRef = doc.ref;
+          batch.update(linkRef, {
+            order: index,
+            updatedAt: serverTimestamp(),
+          });
+          linksToUpdate.push({
+            id: doc.id,
+            ...data,
+            order: index,
+          });
+        }
+      });
+
+      if (linksToUpdate.length > 0) {
+        await batch.commit();
+      }
+
+      return linksToUpdate;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -379,6 +472,9 @@ export const linksSlice = createSlice({
         state.editingLink[field] = value;
       }
     },
+    reorderLinksLocally: (state, action) => {
+      state.links = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // fetchLinks
@@ -389,14 +485,18 @@ export const linksSlice = createSlice({
       })
       .addCase(fetchLinks.fulfilled, (state, action) => {
         state.loading = false;
-        state.links = action.payload;
+        state.links = action.payload.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        });
       })
       .addCase(fetchLinks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // fetchPublicLinks
       .addCase(fetchPublicLinks.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -410,24 +510,25 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // fetchPublicLinksByUsername
       .addCase(fetchPublicLinksByUsername.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPublicLinksByUsername.fulfilled, (state, action) => {
-        state.loading = false; // ÖNEMLI: Bu satırı kontrol et
-        state.publicLinks = action.payload;
+        state.loading = false;
+        state.publicLinks = action.payload.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
       })
       .addCase(fetchPublicLinksByUsername.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // incrementLinkClicks
-      .addCase(incrementLinkClicks.pending, () => {
-        // İşlem çok hızlı olduğu için loading state'i değiştirmiyoruz
-      })
+      .addCase(incrementLinkClicks.pending, () => {})
       .addCase(incrementLinkClicks.fulfilled, (state, action) => {
         const { linkId } = action.payload;
         const linkIndex = state.publicLinks.findIndex(
@@ -443,14 +544,12 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // fetchLinkById
       .addCase(fetchLinkById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchLinkById.fulfilled, (state, action) => {
         state.loading = false;
-        // Varsa linkler listesinde güncelle
         const index = state.links.findIndex(
           (link) => link.id === action.payload.id
         );
@@ -458,7 +557,6 @@ export const linksSlice = createSlice({
           state.links[index] = action.payload;
         }
 
-        // Düzenleme modunda isek, düzenleme nesnesini güncelle
         if (state.editingLinkId === action.payload.id) {
           state.editingLink = action.payload;
         }
@@ -468,7 +566,6 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // createLink
       .addCase(createLink.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -484,7 +581,6 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // updateLinkById
       .addCase(updateLinkById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -498,7 +594,6 @@ export const linksSlice = createSlice({
           state.links[index] = action.payload;
         }
 
-        // Düzenleme modunu kapat
         state.isEditingLink = false;
         state.editingLinkId = null;
         state.editingLink = null;
@@ -508,7 +603,6 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // deleteLinkById
       .addCase(deleteLinkById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -522,17 +616,44 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      // fetchLinksByUserId (Yeni action)
       .addCase(fetchLinksByUserId.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchLinksByUserId.fulfilled, (state, action) => {
         state.loading = false;
-        state.publicLinks = action.payload;
+        state.publicLinks = action.payload.sort((a, b) => {
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
       })
       .addCase(fetchLinksByUserId.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(migrateLinksOrder.pending, () => {})
+      .addCase(migrateLinksOrder.fulfilled, (state, action) => {
+        if (action.payload.length > 0) {
+          state.links = state.links
+            .map((link) => {
+              const updated = action.payload.find(
+                (updated) => updated.id === link.id
+              );
+              return updated ? { ...link, order: updated.order } : link;
+            })
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+        }
+      })
+      .addCase(migrateLinksOrder.rejected, (state, action) => {})
+
+      .addCase(reorderLinks.pending, () => {})
+      .addCase(reorderLinks.fulfilled, (state, action) => {
+        state.links = action.payload;
+      })
+      .addCase(reorderLinks.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
@@ -550,5 +671,6 @@ export const {
   startEditingLink,
   stopEditingLink,
   updateEditingLinkField,
+  reorderLinksLocally,
 } = linksSlice.actions;
 export default linksSlice.reducer;
