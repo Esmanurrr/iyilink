@@ -223,21 +223,11 @@ const Privacy = () => {
             varsa, lütfen bizimle iletişime geçin:
           </p>
           <address className="not-italic mt-4">
-            <div className="mb-2">IyiLink Teknoloji A.Ş.</div>
+            <div className="mb-2">IyiLink</div>
+
             <div className="mb-2">
-              E-posta:{" "}
-              <a
-                href="mailto:privacy@iyilink.co"
-                className="text-blue-600 hover:underline"
-              >
-                privacy@iyilink.co
-              </a>
+              Adres: Ali Kuşçu Mahallesi, Taylasan Sok. No:3, Fatih/İstanbul
             </div>
-            <div className="mb-2">
-              Adres: Levent Mah. Büyükdere Cad. No:123, 34330 Beşiktaş/İstanbul,
-              Türkiye
-            </div>
-            <div>Telefon: +90 (212) 123 45 67</div>
           </address>
         </div>
       </div>
@@ -249,24 +239,6 @@ const Privacy = () => {
         <h2 className="text-xl font-semibold mb-4">Veri Koruma Bildirimi</h2>
 
         <div className="space-y-4">
-          <p>
-            KVKK (Kişisel Verilerin Korunması Kanunu) uyarınca, IyiLink
-            Teknoloji A.Ş. veri sorumlusudur. Kişisel verileriniz, bu Gizlilik
-            Politikası'nda belirtilen amaçlar doğrultusunda işlenmektedir.
-          </p>
-
-          <p>
-            Kişisel verilerinizin işlenmesiyle ilgili taleplerinizi{" "}
-            <a
-              href="mailto:kvkk@iyilink.co"
-              className="text-blue-600 hover:underline"
-            >
-              kvkk@iyilink.co
-            </a>{" "}
-            adresine e-posta göndererek iletebilirsiniz. Başvurunuz en kısa
-            sürede ve en geç 30 gün içinde yanıtlanacaktır.
-          </p>
-
           <p>
             Gizlilik ve veri koruma uygulamalarımız hakkında daha fazla bilgi
             için, lütfen Gizlilik Politikamızın tamamını dikkatlice okuyun.

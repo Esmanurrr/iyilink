@@ -17,8 +17,6 @@ const Terms = () => {
         className="bg-white shadow-md rounded-lg p-6 mb-8"
         style={{ backgroundColor: "var(--color-background-alt)" }}
       >
-        <p className="mb-6">Son güncelleme: 01.07.2023</p>
-
         <div className="prose max-w-none">
           <p>
             IyiLink'i kullanmadan önce lütfen aşağıdaki kullanım şartlarını
@@ -149,77 +147,6 @@ const Terms = () => {
             kaynaklanan doğrudan, dolaylı, tesadüfi, özel, sonuç olarak ortaya
             çıkan veya cezai zararlardan sorumlu tutulamaz.
           </p>
-
-          <h2 className="text-xl font-semibold mt-6 mb-3">9. İletişim</h2>
-          <p>
-            Bu Kullanım Şartları ile ilgili sorularınız veya geri
-            bildirimleriniz için, lütfen{" "}
-            <a
-              href="mailto:legal@iyilink.co"
-              className="text-blue-600 hover:underline"
-            >
-              legal@iyilink.co
-            </a>
-            adresine e-posta gönderin.
-          </p>
-        </div>
-      </div>
-
-      <div
-        className="bg-white shadow-md rounded-lg p-6"
-        style={{ backgroundColor: "var(--color-background-alt)" }}
-      >
-        <h2 className="text-xl font-semibold mb-4">Sık Sorulan Sorular</h2>
-
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-medium mb-2">
-              IyiLink hesabımı nasıl silebilirim?
-            </h3>
-            <p>
-              Hesabınızı silmek için, hesap ayarlarına gidin ve "Hesabı Sil"
-              seçeneğini kullanın. Hesap silme işlemi geri alınamaz ve tüm
-              verileriniz kalıcı olarak silinir.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium mb-2">
-              Aboneliğimi nasıl iptal edebilirim?
-            </h3>
-            <p>
-              Aboneliğinizi iptal etmek için, hesap ayarlarına gidin,
-              "Abonelikler" bölümünü seçin ve "Aboneliği İptal Et" butonuna
-              tıklayın. Aboneliğiniz mevcut fatura döneminin sonunda sona
-              erecektir.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium mb-2">İçeriğimi kim görebilir?</h3>
-            <p>
-              Profilinizin ve içeriğinizin görünürlüğünü hesap ayarlarınızdan
-              kontrol edebilirsiniz. Profilinizi herkese açık, sadece
-              bağlantılarınıza açık veya tamamen özel olarak ayarlayabilirsiniz.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium mb-2">
-              Şifre veya hesap sorunları yaşıyorum. Ne yapmalıyım?
-            </h3>
-            <p>
-              Şifrenizi unuttuysanız, giriş sayfasındaki "Şifremi Unuttum"
-              seçeneğini kullanabilirsiniz. Diğer hesap sorunları için lütfen{" "}
-              <a
-                href="mailto:support@iyilink.co"
-                className="text-blue-600 hover:underline"
-              >
-                support@iyilink.co
-              </a>{" "}
-              adresine e-posta gönderin.
-            </p>
-          </div>
         </div>
       </div>
     </div>

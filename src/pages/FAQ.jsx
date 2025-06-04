@@ -20,25 +20,15 @@ const FAQ = () => {
     },
     {
       question: "IyiLink ücretsiz mi?",
-      answer:
-        "Evet, IyiLink'in temel özellikleri tamamen ücretsizdir. Ancak, gelişmiş analitik, özel tema seçenekleri ve diğer premium özellikler için ücretli abonelik planlarımız bulunmaktadır.",
+      answer: "Evet, IyiLink'in temel özellikleri tamamen ücretsizdir.",
     },
-    {
-      question: "Premium özellikleri nasıl kullanabilirim?",
-      answer:
-        "Premium özelliklere erişmek için hesap sayfanızdaki 'Premium'a Yükselt' butonuna tıklayabilir ve size en uygun abonelik planını seçebilirsiniz. Ödeme işleminiz tamamlandıktan sonra premium özellikler hesabınızda otomatik olarak aktifleşecektir.",
-    },
+
     {
       question: "IyiLink URL'imi nasıl özelleştirebilirim?",
       answer:
         "Kaydolduğunuzda, sizin için benzersiz bir kullanıcı adı oluşturulur (örneğin, iyilink.co/kullaniciadi). Bu kullanıcı adını istediğiniz zaman hesap ayarlarınızdan değiştirebilirsiniz, ancak seçtiğiniz kullanıcı adının başka bir kullanıcı tarafından alınmamış olması gerekmektedir.",
     },
-    {
-      question:
-        "Profilime ekleyebileceğim bağlantı sayısında bir sınır var mı?",
-      answer:
-        "Ücretsiz hesaplar için en fazla 10 bağlantı ekleyebilirsiniz. Premium abonelikle bu sınır kaldırılır ve sınırsız sayıda bağlantı ekleyebilirsiniz.",
-    },
+
     {
       question: "Profilimi nasıl özelleştirebilirim?",
       answer:
@@ -48,16 +38,6 @@ const FAQ = () => {
       question: "Profil ziyaretlerimi takip edebilir miyim?",
       answer:
         "Evet, Dashboard'da bulunan analitik bölümünden profilinizin kaç kez görüntülendiği, hangi bağlantılara tıklandığı ve ziyaretçilerinizin coğrafi dağılımı gibi istatistikleri görebilirsiniz. Daha detaylı analitik bilgiler premium kullanıcılar için sunulmaktadır.",
-    },
-    {
-      question: "Hesabımı nasıl silebilirim?",
-      answer:
-        "Hesabınızı silmek için Hesap Ayarları sayfasındaki 'Hesabı Sil' butonunu kullanabilirsiniz. Hesabınızı silmeden önce tüm verilerinizi yedeklemenizi öneririz, çünkü hesap silme işlemi geri alınamaz.",
-    },
-    {
-      question: "Teknik bir sorun yaşıyorum. Nasıl yardım alabilirim?",
-      answer:
-        "Teknik sorunlar için support@iyilink.co adresine e-posta gönderebilir veya İletişim sayfamızdaki formu kullanabilirsiniz. Destek ekibimiz en kısa sürede size yardımcı olacaktır.",
     },
   ];
 
