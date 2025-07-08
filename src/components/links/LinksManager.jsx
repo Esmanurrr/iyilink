@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchLinks,
@@ -8,6 +8,7 @@ import {
   setIsAddingLink,
   updateNewLinkField,
   setError,
+  resetNewLink,
   startEditingLink,
   stopEditingLink,
   updateEditingLinkField,
@@ -45,6 +46,8 @@ const LinksManager = ({ getIconComponent }) => {
         }
       });
     }
+    dispatch(setIsAddingLink(false));
+    dispatch(resetNewLink());
   }, [dispatch, profile]);
 
   const handleAddLink = async (e) => {
@@ -68,6 +71,7 @@ const LinksManager = ({ getIconComponent }) => {
       };
 
       await dispatch(createLink({ userId: profile.uid, linkData })).unwrap();
+      dispatch(resetNewLink());
     } catch (error) {}
   };
 
@@ -137,6 +141,7 @@ const LinksManager = ({ getIconComponent }) => {
 
   const handleCancelAddLink = () => {
     dispatch(setIsAddingLink(false));
+    dispatch(resetNewLink());
   };
 
   return (
