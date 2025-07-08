@@ -99,7 +99,7 @@ const LinkItem = ({
         >
           {getIconComponent(link.icon)}
         </div>
-        <div className="min-w-0 flex-1 max-w-full">
+        <div className="min-w-0 flex-1 w-72">
           <h3
             className="font-medium text-sm sm:text-base truncate"
             style={{ color: "var(--color-dark-text)" }}
