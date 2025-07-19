@@ -13,10 +13,13 @@ import {
   stopEditingLink,
   updateEditingLinkField,
   migrateLinksOrder,
+  setLinks,
 } from "../../redux/slices/linksSlice";
 
 import LinkList from "./LinkList";
 import LinkForm from "./LinkForm";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const LinksManager = ({ getIconComponent }) => {
   const dispatch = useDispatch();
@@ -33,22 +36,63 @@ const LinksManager = ({ getIconComponent }) => {
   const { profile } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (profile?.uid) {
-      dispatch(fetchLinks(profile.uid)).then((result) => {
-        if (result.type === "links/fetchLinks/fulfilled") {
-          const linksWithoutOrder = result.payload.filter(
-            (link) => link.order === undefined || link.order === null
-          );
+    let unsubscribeFromLinks = null;
 
-          if (linksWithoutOrder.length > 0) {
-            dispatch(migrateLinksOrder(profile.uid));
-          }
+    if (profile?.uid) {
+      // İlk yükleme için fetchLinks'i çağırabiliriz
+      // Ancak real-time listener daha doğru bir çözüm sunar.
+      // Eğer fetchLinks'i çağırırsanız, onSnapshot ilk veriyi getireceği için
+      // fetchLinks'in dönen payload'ını setLinks ile güncellemenize gerek kalmaz.
+      // Ya da sadece listenToUserLinks kullanabilirsiniz.
+      // Aşağıdaki fetchLinks çağrısını kaldırıyorum, onSnapshot ilk veriyi verecektir.
+
+      // dispatch(fetchLinks(profile.uid)).then((result) => {
+      //   if (result.type === "links/fetchLinks/fulfilled") {
+      //     const linksWithoutOrder = result.payload.filter(
+      //       (link) => link.order === undefined || link.order === null
+      //     );
+      //     if (linksWithoutOrder.length > 0) {
+      //       dispatch(migrateLinksOrder(profile.uid));
+      //     }
+      //   }
+      // });
+
+      // <<< REAL-TIME DİNLEYİCİYİ BAŞLATIYORUZ
+      // onSnapshot'ın döndürdüğü unsubscribe fonksiyonunu saklıyoruz.
+      // Thunk doğrudan unsubscribe'ı döndürmediği için,
+      // onSnapshot'ı burada doğrudan kullanabiliriz.
+      const linksCollectionRef = collection(db, "users", profile.uid, "links");
+      const q = query(linksCollectionRef, orderBy("order", "asc"));
+
+      unsubscribeFromLinks = onSnapshot(
+        q,
+        (snapshot) => {
+          const updatedLinks = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          // Her değişiklikte Redux state'ini güncelle
+          dispatch(setLinks(updatedLinks));
+        },
+        (err) => {
+          console.error("Error listening to user links in LinksManager:", err);
+          dispatch(setError(err.message));
         }
-      });
+      );
     }
+
     dispatch(setIsAddingLink(false));
     dispatch(resetNewLink());
-  }, [dispatch, profile]);
+
+    // Cleanup fonksiyonu: Komponent unmount edildiğinde dinleyiciyi durdur
+    return () => {
+      if (unsubscribeFromLinks) {
+        unsubscribeFromLinks();
+      }
+      // `LinksManager` unmount olduğunda, kendi linklerini temizlemeyi düşünebilirsin
+      // dispatch(clearLinks()); // İsteğe bağlı: LinkManager ayrıldığında kendi linklerini sıfırla
+    };
+  }, [dispatch, profile?.uid]); // profile.uid bağımlılığını ekliyoruz
 
   const handleAddLink = async (e) => {
     e.preventDefault();

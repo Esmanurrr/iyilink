@@ -7,7 +7,11 @@ import {
   clearPublicProfile,
   fetchProfileByUsername,
 } from "../redux/slices/userSlice";
-import { clearLinks, fetchLinksByUserId } from "../redux/slices/linksSlice";
+import {
+  clearLinks,
+  fetchLinksByUserId,
+  incrementLinkClicks,
+} from "../redux/slices/linksSlice";
 import { incrementProfileView } from "../redux/slices/statsSlice";
 import {
   getResponsiveFontSize,
@@ -82,12 +86,7 @@ const PublicProfile = () => {
     window.open(url, "_blank", "noopener,noreferrer");
 
     if (publicProfile?.id) {
-      try {
-        const linkRef = doc(db, "users", publicProfile.id, "links", linkId);
-        await updateDoc(linkRef, {
-          clicks: increment(1),
-        });
-      } catch {}
+      dispatch(incrementLinkClicks({ userId: publicProfile.id, linkId }));
     }
   };
 

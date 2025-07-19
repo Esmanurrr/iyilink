@@ -13,6 +13,7 @@ import {
   increment,
   writeBatch,
   orderBy,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -150,11 +151,12 @@ export const fetchPublicLinksByUsername = createAsyncThunk(
 
 export const incrementLinkClicks = createAsyncThunk(
   "links/incrementLinkClicks",
-  async (linkId, { rejectWithValue }) => {
+  async ({ userId, linkId }, { rejectWithValue }) => {
     try {
+      if (!userId) return rejectWithValue("User ID'si gereklidir");
       if (!linkId) return rejectWithValue("Link ID'si gereklidir");
 
-      const linkRef = doc(db, "links", linkId);
+      const linkRef = doc(db, "users", userId, "links", linkId);
 
       await updateDoc(linkRef, {
         clicks: increment(1),
@@ -409,6 +411,43 @@ export const migrateLinksOrder = createAsyncThunk(
   }
 );
 
+export const listenToUserLinks = createAsyncThunk(
+  "links/listenToUserLinks",
+  async (userId, { dispatch, rejectWithValue }) => {
+    if (!userId) {
+      return rejectWithValue("User ID is required for listening to links.");
+    }
+
+    const linksCollectionRef = collection(db, "users", userId, "links");
+    const q = query(linksCollectionRef, orderBy("order", "asc")); // Linklerin sırasını korumak için
+
+    // onSnapshot bir unsubscriber döndürür. Bu, useEffect cleanup'ında kullanılacak.
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const updatedLinks = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        // Linkler değiştiğinde Redux state'ini güncelle
+        dispatch(setLinks(updatedLinks)); // <<< YENİ REDUCER'ı dispatch ediyoruz
+      },
+      (error) => {
+        console.error("Error listening to user links:", error);
+        dispatch(setError(error.message));
+      }
+    );
+
+    // Bu thunk, cleanup için unsubscribe fonksiyonunu döndürmelidir.
+    // Ancak createAsyncThunk doğrudan bir cleanup fonksiyonu döndürmez.
+    // Bu yüzden unsubscribe fonksiyonunu LinksManager'da yakalayıp kullanacağız.
+    // Thunk'ın kendisi bir promise döndürdüğü için, burada null dönüyoruz
+    // ve unsubscribe'ı side-effect olarak yönetiyoruz.
+    return unsubscribe; // Bu şekilde unsubscribe'ı döndürmek standart bir kullanım değildir.
+    // Aşağıda LinksManager'da nasıl yöneteceğimizi açıklayacağım.
+  }
+);
+
 const initialState = {
   links: [],
   publicLinks: [],
@@ -426,6 +465,9 @@ export const linksSlice = createSlice({
   name: "links",
   initialState,
   reducers: {
+    setLinks: (state, action) => {
+      state.links = action.payload;
+    },
     clearLinks: (state) => {
       state.links = [];
       state.error = null;
@@ -485,12 +527,12 @@ export const linksSlice = createSlice({
       })
       .addCase(fetchLinks.fulfilled, (state, action) => {
         state.loading = false;
-        state.links = action.payload.sort((a, b) => {
-          if (a.order !== undefined && b.order !== undefined) {
-            return a.order - b.order;
-          }
-          return new Date(a.createdAt) - new Date(b.createdAt);
-        });
+        // state.links = action.payload.sort((a, b) => {
+        //   if (a.order !== undefined && b.order !== undefined) {
+        //     return a.order - b.order;
+        //   }
+        //   return new Date(a.createdAt) - new Date(b.createdAt);
+        // });
       })
       .addCase(fetchLinks.rejected, (state, action) => {
         state.loading = false;
@@ -528,7 +570,9 @@ export const linksSlice = createSlice({
         state.error = action.payload;
       })
 
-      .addCase(incrementLinkClicks.pending, () => {})
+      .addCase(incrementLinkClicks.pending, (state) => {
+        state.error = null;
+      })
       .addCase(incrementLinkClicks.fulfilled, (state, action) => {
         const { linkId } = action.payload;
         const linkIndex = state.publicLinks.findIndex(
@@ -543,7 +587,14 @@ export const linksSlice = createSlice({
       .addCase(incrementLinkClicks.rejected, (state, action) => {
         state.error = action.payload;
       })
-
+      .addCase(listenToUserLinks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(listenToUserLinks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(fetchLinkById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -660,6 +711,7 @@ export const linksSlice = createSlice({
 });
 
 export const {
+  setLinks,
   clearLinks,
   clearPublicLinks,
   clearCurrentLink,
