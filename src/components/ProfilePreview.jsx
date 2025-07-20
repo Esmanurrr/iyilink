@@ -192,14 +192,6 @@ const ProfilePreview = ({ getIconComponent }) => {
                   {getIconComponent(link.icon)}
                 </span>
                 {link.title}
-                {link.clicks > 0 && (
-                  <span
-                    className="ml-auto text-xs opacity-60"
-                    title="Tıklama sayısı"
-                  >
-                    {link.clicks}
-                  </span>
-                )}
               </a>
             ))
           ) : (
