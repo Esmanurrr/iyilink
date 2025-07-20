@@ -39,28 +39,6 @@ const LinksManager = ({ getIconComponent }) => {
     let unsubscribeFromLinks = null;
 
     if (profile?.uid) {
-      // İlk yükleme için fetchLinks'i çağırabiliriz
-      // Ancak real-time listener daha doğru bir çözüm sunar.
-      // Eğer fetchLinks'i çağırırsanız, onSnapshot ilk veriyi getireceği için
-      // fetchLinks'in dönen payload'ını setLinks ile güncellemenize gerek kalmaz.
-      // Ya da sadece listenToUserLinks kullanabilirsiniz.
-      // Aşağıdaki fetchLinks çağrısını kaldırıyorum, onSnapshot ilk veriyi verecektir.
-
-      // dispatch(fetchLinks(profile.uid)).then((result) => {
-      //   if (result.type === "links/fetchLinks/fulfilled") {
-      //     const linksWithoutOrder = result.payload.filter(
-      //       (link) => link.order === undefined || link.order === null
-      //     );
-      //     if (linksWithoutOrder.length > 0) {
-      //       dispatch(migrateLinksOrder(profile.uid));
-      //     }
-      //   }
-      // });
-
-      // <<< REAL-TIME DİNLEYİCİYİ BAŞLATIYORUZ
-      // onSnapshot'ın döndürdüğü unsubscribe fonksiyonunu saklıyoruz.
-      // Thunk doğrudan unsubscribe'ı döndürmediği için,
-      // onSnapshot'ı burada doğrudan kullanabiliriz.
       const linksCollectionRef = collection(db, "users", profile.uid, "links");
       const q = query(linksCollectionRef, orderBy("order", "asc"));
 
@@ -71,11 +49,9 @@ const LinksManager = ({ getIconComponent }) => {
             id: doc.id,
             ...doc.data(),
           }));
-          // Her değişiklikte Redux state'ini güncelle
           dispatch(setLinks(updatedLinks));
         },
         (err) => {
-          console.error("Error listening to user links in LinksManager:", err);
           dispatch(setError(err.message));
         }
       );
@@ -84,15 +60,12 @@ const LinksManager = ({ getIconComponent }) => {
     dispatch(setIsAddingLink(false));
     dispatch(resetNewLink());
 
-    // Cleanup fonksiyonu: Komponent unmount edildiğinde dinleyiciyi durdur
     return () => {
       if (unsubscribeFromLinks) {
         unsubscribeFromLinks();
       }
-      // `LinksManager` unmount olduğunda, kendi linklerini temizlemeyi düşünebilirsin
-      // dispatch(clearLinks()); // İsteğe bağlı: LinkManager ayrıldığında kendi linklerini sıfırla
     };
-  }, [dispatch, profile?.uid]); // profile.uid bağımlılığını ekliyoruz
+  }, [dispatch, profile?.uid]);
 
   const handleAddLink = async (e) => {
     e.preventDefault();
@@ -271,6 +244,7 @@ const LinksManager = ({ getIconComponent }) => {
           links={links}
           loading={loading}
           isEditingLink={isEditingLink}
+          isAddingLink={isAddingLink}
           profile={profile}
           onEdit={handleEditLink}
           onDelete={handleDeleteLink}

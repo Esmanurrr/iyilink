@@ -30,6 +30,7 @@ const LinkList = ({
   links,
   loading,
   isEditingLink,
+  isAddingLink,
   profile,
   onEdit,
   onDelete,
@@ -110,7 +111,7 @@ const LinkList = ({
     );
   }
 
-  if (!loading && links.length === 0) {
+  if (!loading && links.length === 0 && !isAddingLink) {
     return (
       <div
         className="text-center py-12 px-6 rounded-lg border"

@@ -13,10 +13,6 @@ const LinkForm = ({
   const submitText = isEdit ? "Güncelle" : "Ekle";
   const loadingText = isEdit ? "Güncelleniyor..." : "Ekleniyor...";
 
-  const resetFormData = (field) => {
-    onChange(field, "");
-  };
-
   const handleFieldChange = (field, value) => {
     onChange(field, value);
   };
