@@ -10,6 +10,7 @@ import {
   truncateUsername,
   getResponsiveTextClasses,
 } from "../utils/textUtils";
+import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const ProfileStatisticsCard = ({ currentUser }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -95,7 +96,9 @@ const ProfileStatisticsCard = ({ currentUser }) => {
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(`iyilink.co/${username}`);
+      showSuccessToast("Bağlantı kopyalandı!");
     } catch (err) {
+      showErrorToast("Bağlantı kopyalanamadı. Lütfen tekrar deneyin.");
     }
   };
 

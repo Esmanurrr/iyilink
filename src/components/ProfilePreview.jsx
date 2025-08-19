@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getResponsiveFontSize, truncateUsername } from "../utils/textUtils";
+import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const ProfilePreview = ({ getIconComponent }) => {
   const { profile } = useSelector((state) => state.user);
@@ -44,7 +45,10 @@ const ProfilePreview = ({ getIconComponent }) => {
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
-    } catch (err) {}
+      showSuccessToast("Bağlantı kopyalandı!");
+    } catch (err) {
+      showErrorToast("Bağlantı kopyalanamadı", err);
+    }
   };
 
   return (

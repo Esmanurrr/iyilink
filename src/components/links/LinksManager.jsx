@@ -20,6 +20,7 @@ import LinkList from "./LinkList";
 import LinkForm from "./LinkForm";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
+import { showErrorToast, showSuccessToast } from "../../utils/toastUtils";
 
 const LinksManager = ({ getIconComponent }) => {
   const dispatch = useDispatch();
@@ -69,6 +70,7 @@ const LinksManager = ({ getIconComponent }) => {
 
   const handleAddLink = async (e) => {
     e.preventDefault();
+    showSuccessToast("Bağlantı eklendi!");
 
     if (!profile?.uid) {
       dispatch(setError("Kullanıcı girişi yapılmamış. Lütfen giriş yapın."));
@@ -98,6 +100,7 @@ const LinksManager = ({ getIconComponent }) => {
 
   const handleUpdateLink = async (e) => {
     e.preventDefault();
+    showSuccessToast("Bağlantı güncellendi!");
 
     if (!profile?.uid || !editingLinkId) {
       dispatch(
@@ -126,7 +129,9 @@ const LinksManager = ({ getIconComponent }) => {
           linkData,
         })
       ).unwrap();
-    } catch (error) {}
+    } catch (error) {
+      showErrorToast("Bağlantı güncellenemedi!", error);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -136,12 +141,16 @@ const LinksManager = ({ getIconComponent }) => {
   const handleDeleteLink = async (linkId) => {
     if (!profile?.uid) {
       dispatch(setError("Kullanıcı girişi yapılmamış. Lütfen giriş yapın."));
+      showErrorToast("Lütfen giriş yapınız");
       return;
     }
 
     try {
       await dispatch(deleteLinkById({ userId: profile.uid, linkId })).unwrap();
-    } catch (error) {}
+      showSuccessToast("Bağlantı silindi!");
+    } catch (error) {
+      showErrorToast("Bağlantı silinemedi!", error);
+    }
   };
 
   const handleFieldChange = (field, value) => {
