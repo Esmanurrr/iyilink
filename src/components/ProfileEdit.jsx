@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const ProfileEdit = () => {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ const ProfileEdit = () => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         setImageError(true);
+        showErrorToast("Fotoğraf çok büyük!");
         return;
       }
 
@@ -68,11 +70,14 @@ const ProfileEdit = () => {
         setValue("photoURL", base64Image, { shouldDirty: true });
         setLocalImagePreview(base64Image);
         setImageError(false);
+        showErrorToast("Fotoğraf yüklenemedi!");
       };
       reader.onerror = () => {
         setImageError(true);
+        showErrorToast("Fotoğraf yüklenemedi!");
       };
       reader.readAsDataURL(file);
+      showSuccessToast("Fotoğraf başarıyla yüklendi!");
     }
   };
 
@@ -81,10 +86,12 @@ const ProfileEdit = () => {
 
     if (data.username !== originalUsername) {
       setShowUsernameModal(true);
+      showSuccessToast("Profiliniz güncellendi!");
       return;
     }
 
     saveProfileData(data);
+    showSuccessToast("Profiliniz güncellendi!");
   };
 
   const saveProfileData = (data) => {
