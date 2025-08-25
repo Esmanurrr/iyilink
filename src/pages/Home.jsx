@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
+import phones from "/phones.png";
+import easyUse from "/easy-use.svg";
+import featured from "/featured.svg";
+import analytics from "/analytics.svg";
+import heart from "/heart.svg";
 
 export default function Home() {
   const { currentUser, loading, authInitialized } = useAuth();
@@ -10,62 +15,57 @@ export default function Home() {
   }
 
   return (
-    <div style={{ backgroundColor: "#FFFFFF" }}>
-      <section
-        className="py-16 md:py-24"
-        style={{ backgroundColor: "#FFFFFF" }}
-      >
-        <div className="container mx-auto text-center max-w-4xl">
-          <h1
-            className="text-4xl md:text-6xl font-bold mb-6"
-            style={{ color: "var(--color-dark-text)" }}
-          >
-            Tüm Bağlantılarınız İçin Tek Yer
-          </h1>
-          <p
-            className="text-xl md:text-2xl mb-10"
-            style={{ color: "var(--color-light-text)" }}
-          >
-            Sosyal medya hesaplarınızı, websitelerinizi ve daha fazlasını tek
-            bir bağlantıda toplayın.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
-            {currentUser ? (
-              <Link
-                to="/dashboard"
-                className="px-8 py-3 font-medium rounded-lg transition-colors"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                }}
-              >
-                Dashboard'a Git
-              </Link>
-            ) : (
-              <>
+    <>
+      <section className="home-section">
+        <div className="container mx-auto flex flex-col md:flex-row relative justify-between z-10">
+          <div className="flex-1 p-4 text-center md:text-left md:p-16 flex flex-col justify-center">
+            <h1
+              className="font-baloo text-4xl md:text-6xl mb-6 font-bold text-white leading-tight"
+              style={{ color: "var(--color-neutral-light)" }}
+            >
+              Tüm <br /> bağlantılarınız <br /> için tek yer
+            </h1>
+            <p
+              className="text-lg md:text-xl self-center mb-6 md:mb-10 text-gray-300 max-w-md"
+              style={{ color: "var(--color-neutral-light)" }}
+            >
+              Sosyal medya hesaplarınızı, websitelerinizi ve daha fazlasını tek
+              bir bağlantıda toplayın.
+            </p>
+            <div className="flex flex-col md:flex-row md:justify-start  gap-4 justify-center">
+              {currentUser ? (
                 <Link
-                  to="/signup"
-                  className="px-8 py-3 font-medium rounded-lg transition-colors"
+                  to="/dashboard"
+                  className="px-8 py-3 font-medium rounded-3xl transition-colors"
                   style={{
-                    backgroundColor: "var(--color-primary)",
-                    color: "white",
+                    backgroundColor: "var(--color-white-bg)",
+                    color: "black",
                   }}
                 >
-                  Ücretsiz Kayıt Ol
+                  Dashboard'a Git
                 </Link>
-                <Link
-                  to="/login"
-                  className="px-8 py-3 font-medium rounded-lg transition-colors border"
-                  style={{
-                    backgroundColor: "var(--color-neutral-light)",
-                    color: "var(--color-primary)",
-                    borderColor: "var(--color-border)",
-                  }}
-                >
-                  Giriş Yap
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link
+                    to="/signup"
+                    className="px-8 py-3 font-medium rounded-3xl transition-colors"
+                    style={{
+                      backgroundColor: "var(--color-white-bg)",
+                      color: "black",
+                    }}
+                  >
+                    Ücretsiz Kayıt Ol
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex-1 relative flex items-center justify-center w-full mb-6 md:mb-2">
+            <img
+              src={phones}
+              alt="Phones"
+              className="h-72 sm:h-80 md:h-96 object-contain relative z-10"
+            />
           </div>
         </div>
       </section>
@@ -74,41 +74,28 @@ export default function Home() {
         className="py-16"
         style={{ backgroundColor: "var(--color-card-bg)" }}
       >
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-6x mt-10">
           <h2
-            className="text-3xl font-bold text-center mb-12"
+            className="text-5xl font-baloo text-center mb-12"
             style={{ color: "var(--color-dark-text)" }}
           >
-            Özellikler
+            İyilink'le beğen, <br />
+            <span style={{ color: "var(--color-primary-hover)" }}>
+              İyilink'le
+            </span>{" "}
+            paylaş.
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div
-              className="p-6 rounded-lg shadow-sm"
+              className="p-6 border border-gray-200 rounded-3xl shadow-sm text-center"
               style={{ backgroundColor: "var(--color-neutral-light)" }}
             >
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{
-                  backgroundColor: "var(--color-secondary)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
+              <img
+                src={easyUse}
+                alt="Kolay Kullanım"
+                className="mx-auto mb-4"
+              />
               <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-dark-text)" }}
@@ -122,31 +109,14 @@ export default function Home() {
             </div>
 
             <div
-              className="p-6 rounded-lg shadow-sm"
-              style={{ backgroundColor: "var(--color-neutral-light)" }}
+              className="p-6 border border-gray-200 rounded-3xl shadow-sm text-center"
+              style={{ borderColor: "var(--color-neutral-dark)" }}
             >
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{
-                  backgroundColor: "var(--color-secondary)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
-                  />
-                </svg>
-              </div>
+              <img
+                src={featured}
+                alt="Özelleştirilebilir"
+                className="mx-auto mb-4"
+              />
               <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-dark-text)" }}
@@ -160,31 +130,10 @@ export default function Home() {
             </div>
 
             <div
-              className="p-6 rounded-lg shadow-sm"
+              className="p-6 border border-gray-200 rounded-3xl shadow-sm text-center"
               style={{ backgroundColor: "var(--color-neutral-light)" }}
             >
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{
-                  backgroundColor: "var(--color-secondary)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </div>
+              <img src={analytics} alt="Analitikler" className="mx-auto mb-4" />
               <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-dark-text)" }}
@@ -200,30 +149,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        className="py-16 text-white"
-        style={{ backgroundColor: "var(--color-primary)" }}
-      >
+      <section className="py-16">
         <div className="container mx-auto text-center max-w-3xl">
-          <h2 className="text-3xl font-bold mb-6">Bugün Başlayın</h2>
-          <p className="text-xl mb-8 opacity-90">
-            İyiLink ile tüm bağlantılarınızı tek bir URL altında paylaşmaya
-            başlayın.
+          <img src={heart} alt="Kalp" className="mx-auto mb-20" />
+          <p className="text-2xl mb-8 opacity-70">
+            İyilink, dijital dünyadaki tüm bağlantılarınızı tek bir linkte
+            toplamanızı sağlayan akıllı ve sade bir platformdur. Sosyal medya
+            biyonuza koyabileceğiniz bu tek bağlantıyla, takipçilerinizi tüm
+            projelerinize, hesaplarınıza ve içeriklerinize yönlendirin.
+          </p>
+          <p className="text-3xl font-baloo mb-20">
+            Bağlantılarınız dağınık olmasın, hepsi tek bir yerde birleşsin!
           </p>
           {!currentUser && (
             <Link
               to="/signup"
-              className="px-8 py-3 font-medium rounded-lg transition-colors"
+              className="px-10 py-4 w-1/2 text-3xl font-baloo rounded-full transition-colors"
               style={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-dark-text)",
                 color: "var(--color-primary)",
               }}
             >
-              Ücretsiz Hesap Oluştur
+              Ücretsiz Kayıt Ol
             </Link>
           )}
         </div>
       </section>
-    </div>
+    </>
   );
 }

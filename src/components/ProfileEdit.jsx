@@ -173,7 +173,7 @@ const ProfileEdit = () => {
       <div
         className="rounded-xl p-6"
         style={{
-          backgroundColor: "var(--color-card-bg)",
+          backgroundColor: "var(--color-background)",
           boxShadow: "0 4px 12px var(--color-shadow)",
           border: "1px solid var(--color-border)",
         }}

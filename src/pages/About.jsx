@@ -8,7 +8,7 @@ const About = () => {
     >
       <h1
         className="text-3xl font-bold mb-6"
-        style={{ color: "var(--color-primary)" }}
+        style={{ color: "var(--color-primary-hover)" }}
       >
         Hakkımızda
       </h1>
@@ -20,7 +20,7 @@ const About = () => {
         >
           <h2
             className="text-xl font-semibold mb-4"
-            style={{ color: "var(--color-primary)" }}
+            style={{ color: "var(--color-primary-hover)" }}
           >
             Biz Kimiz?
           </h2>
@@ -45,7 +45,7 @@ const About = () => {
         >
           <h2
             className="text-xl font-semibold mb-4"
-            style={{ color: "var(--color-primary)" }}
+            style={{ color: "var(--color-primary-hover)" }}
           >
             Vizyonumuz ve Misyonumuz
           </h2>
@@ -69,7 +69,7 @@ const About = () => {
       >
         <h2
           className="text-xl font-semibold mb-6"
-          style={{ color: "var(--color-primary)" }}
+          style={{ color: "var(--color-primary-hover)" }}
         >
           Hikayemiz
         </h2>
@@ -108,7 +108,7 @@ const About = () => {
       >
         <h2
           className="text-xl font-semibold mb-6"
-          style={{ color: "var(--color-primary)" }}
+          style={{ color: "var(--color-primary-hover)" }}
         >
           Değerlerimiz
         </h2>
@@ -117,7 +117,7 @@ const About = () => {
           <div className="text-center p-4">
             <div
               className="inline-block p-3 rounded-full mb-4"
-              style={{ backgroundColor: "var(--color-primary-light)" }}
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,7 @@ const About = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                style={{ color: "var(--color-primary)" }}
+                style={{ color: "var(--color-primary-hover)" }}
               >
                 <path
                   strokeLinecap="round"
@@ -145,7 +145,7 @@ const About = () => {
           <div className="text-center p-4">
             <div
               className="inline-block p-3 rounded-full mb-4"
-              style={{ backgroundColor: "var(--color-primary-light)" }}
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -153,7 +153,7 @@ const About = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                style={{ color: "var(--color-primary)" }}
+                style={{ color: "var(--color-primary-hover)" }}
               >
                 <path
                   strokeLinecap="round"
@@ -173,7 +173,7 @@ const About = () => {
           <div className="text-center p-4">
             <div
               className="inline-block p-3 rounded-full mb-4"
-              style={{ backgroundColor: "var(--color-primary-light)" }}
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -181,7 +181,7 @@ const About = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                style={{ color: "var(--color-primary)" }}
+                style={{ color: "var(--color-primary-hover)" }}
               >
                 <path
                   strokeLinecap="round"

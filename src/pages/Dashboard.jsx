@@ -5,7 +5,6 @@ import ProfilePreview from "../components/ProfilePreview";
 import ProfileStatisticsCard from "../components/ProfileStatisticsCard";
 import Loading from "../components/Loading";
 
-
 export default function Dashboard() {
   const { currentUser, loading, authInitialized } = useAuth();
 
@@ -17,12 +16,12 @@ export default function Dashboard() {
     return (
       <div
         className="flex items-center justify-center h-screen"
-        style={{ backgroundColor: "var(--color-background)" }}
+        style={{ backgroundColor: "var(--color-white-bg)" }}
       >
         <div
           className="text-center p-8 rounded-lg shadow-md"
           style={{
-            backgroundColor: "var(--color-card-bg)",
+            backgroundColor: "var(--color-white-bg)",
             boxShadow: "0 4px 6px var(--color-shadow)",
           }}
         >
@@ -108,7 +107,7 @@ export default function Dashboard() {
   return (
     <div
       className="min-h-screen py-10 px-4"
-      style={{ backgroundColor: "var(--color-background)" }}
+      style={{ backgroundColor: "var(--color-white-bg)" }}
     >
       <div className="container mx-auto max-w-6xl">
         <ProfileStatisticsCard currentUser={currentUser} />

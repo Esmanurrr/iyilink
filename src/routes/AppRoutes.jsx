@@ -27,7 +27,7 @@ const MinimalLayout = () => (
     className="minimal-layout"
     style={{
       minHeight: "100vh",
-      backgroundColor: "var(--color-background)",
+      backgroundColor: "var(--color-white-bg)",
       display: "flex",
       flexDirection: "column",
     }}

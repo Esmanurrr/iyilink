@@ -8,7 +8,7 @@ export default function Layout() {
     <div
       className="flex flex-col min-h-screen"
       style={{
-        backgroundColor: "var(--color-background)",
+        backgroundColor: "var(--color-white-bg)",
         color: "var(--color-dark-text)",
       }}
     >

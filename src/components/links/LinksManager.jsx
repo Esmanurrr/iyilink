@@ -174,13 +174,12 @@ const LinksManager = ({ getIconComponent }) => {
     <div
       className="rounded-xl p-6 h-full"
       style={{
-        backgroundColor: "var(--color-card-bg)",
+        backgroundColor: "var(--color-background)",
         boxShadow: "0 4px 12px var(--color-shadow)",
         borderColor: "var(--color-border)",
         border: "1px solid var(--color-border)",
       }}
     >
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h2
           className="text-xl font-bold"
@@ -194,7 +193,7 @@ const LinksManager = ({ getIconComponent }) => {
             className="px-4 py-2 rounded-lg transition-colors flex items-center justify-center sm:justify-start w-full sm:w-auto"
             style={{
               backgroundColor: "var(--color-primary)",
-              color: "white",
+              color: "var(--color-dark-text)",
               boxShadow: "0 2px 4px var(--color-shadow)",
             }}
             disabled={!profile?.uid || isEditingLink}

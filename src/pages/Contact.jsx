@@ -19,7 +19,6 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Form validation
     if (!formData.name || !formData.email || !formData.message) {
       setSubmitStatus({
         success: false,
@@ -49,7 +48,7 @@ const Contact = () => {
     >
       <h1
         className="text-3xl font-bold mb-6"
-        style={{ color: "var(--color-primary)" }}
+        style={{ color: "var(--color-primary-light)" }}
       >
         İletişim
       </h1>
@@ -156,7 +155,7 @@ const Contact = () => {
                 type="submit"
                 className="px-6 py-2 rounded font-medium"
                 style={{
-                  backgroundColor: "var(--color-primary)",
+                  backgroundColor: "var(--color-primary-hover)",
                   color: "white",
                 }}
               >

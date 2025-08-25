@@ -127,7 +127,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
             @{username}
           </h1>
           <div className="flex items-center min-w-0">
-            <p
+            <span
               className="truncate flex-1 text-sm sm:text-base"
               style={{ color: "var(--color-light-text)" }}
               title={`iyilink.co/${username}`}
@@ -137,7 +137,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
               <span className="font-medium">
                 {truncateUsername(username, 15)}
               </span>
-            </p>
+            </span>
             <button
               onClick={handleCopyToClipboard}
               className="ml-2 text-sm p-1 rounded-md flex-shrink-0 hover:bg-opacity-80 transition-colors"
@@ -162,12 +162,6 @@ const ProfileStatisticsCard = ({ currentUser }) => {
               </svg>
             </button>
           </div>
-          <p
-            className="text-xs mt-1"
-            style={{ color: "var(--color-light-text)" }}
-          >
-            Son güncelleme: <span>{formatLastUpdated()}</span>
-          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto flex-shrink-0">
@@ -204,7 +198,7 @@ const ProfileStatisticsCard = ({ currentUser }) => {
             className="px-4 py-2 rounded-lg transition-colors flex items-center justify-center"
             style={{
               backgroundColor: "var(--color-primary)",
-              color: "white",
+              color: "var(--color-dark-text)",
               boxShadow: "0 2px 4px var(--color-shadow)",
             }}
           >

@@ -93,13 +93,13 @@ const LinkItem = ({
         <div
           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0"
           style={{
-            backgroundColor: "var(--color-accent)",
+            backgroundColor: "var(--color-primary-hover)",
             color: "var(--color-primary)",
           }}
         >
           {getIconComponent(link.icon)}
         </div>
-        <div className="min-w-0 flex-1 w-72">
+        <div className="min-w-0 flex-1">
           <h3
             className="font-medium text-sm sm:text-base truncate"
             style={{ color: "var(--color-dark-text)" }}
@@ -110,7 +110,7 @@ const LinkItem = ({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs sm:text-sm hover:underline truncate block"
+            className="text-xs sm:text-sm hover:underline truncate block max-w-[280px] md:max-w-[400px]"
             style={{ color: "var(--color-link)" }}
             title={link.url}
           >
@@ -123,8 +123,8 @@ const LinkItem = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-4 md:flex-shrink-0">
-        <div className="text-left sm:text-right mr-2 whitespace-nowrap">
+      <div className="flex flex-wrap items-center justify-between w-full sm:w-auto sm:space-x-4 flex-shrink-0 min-w-[120px] max-sm:flex-col max-sm:items-start">
+        <div className="text-left sm:text-right mr-2 whitespace-nowrap min-w-[70px]">
           <span
             className="text-xs sm:text-sm"
             style={{ color: "var(--color-light-text)" }}
@@ -138,7 +138,7 @@ const LinkItem = ({
             {link.clicks}
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 flex-shrink-0 mt-2 sm:mt-0">
           <button
             onClick={() => onEdit(link.id)}
             className="p-1.5 sm:p-2 rounded-md transition-colors flex-shrink-0"
