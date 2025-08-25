@@ -26,7 +26,7 @@ export default function Home() {
               Tüm <br /> bağlantılarınız <br /> için tek yer
             </h1>
             <p
-              className="text-lg md:text-xl self-center mb-6 md:mb-10 text-gray-300 max-w-md"
+              className="text-lg md:text-xl mb-6 md:mb-10 text-gray-300 max-w-md text-center md:text-left mx-auto md:mx-0"
               style={{ color: "var(--color-neutral-light)" }}
             >
               Sosyal medya hesaplarınızı, websitelerinizi ve daha fazlasını tek
@@ -164,7 +164,7 @@ export default function Home() {
           {!currentUser && (
             <Link
               to="/signup"
-              className="px-10 py-4 w-1/2 text-3xl font-baloo rounded-full transition-colors"
+              className="px-10 py-4 sm:text-2xl md:text-3xl font-baloo rounded-full transition-colors duration-300 block sm:inline-block mx-auto max-w-xs sm:max-w-sm md:max-w-md text-center"
               style={{
                 backgroundColor: "var(--color-dark-text)",
                 color: "var(--color-primary)",
