@@ -39,3 +39,25 @@ export const getResponsiveTextClasses = (text) => {
 
   return "text-xl sm:text-2xl lg:text-3xl";
 };
+
+export const shortenUrl = (url) => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname + (urlObj.pathname !== "/" ? "..." : "");
+  } catch {
+    return url.length > 25 ? url.substring(0, 22) + "..." : url;
+  }
+};
+
+export const mediumShortenUrl = (url) => {
+  try {
+    const urlObj = new URL(url);
+    let path = urlObj.pathname;
+    if (path.length > 15) {
+      path = path.substring(0, 12) + "...";
+    }
+    return urlObj.hostname + path;
+  } catch {
+    return url.length > 40 ? url.substring(0, 37) + "..." : url;
+  }
+};

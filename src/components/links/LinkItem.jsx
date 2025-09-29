@@ -1,6 +1,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { mediumShortenUrl, shortenUrl } from "../../utils/textUtils";
 
 const LinkItem = ({
   link,
@@ -25,28 +26,6 @@ const LinkItem = ({
     opacity: isDragging ? 0.8 : 1,
   };
 
-  const shortenUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.hostname + (urlObj.pathname !== "/" ? "..." : "");
-    } catch {
-      return url.length > 25 ? url.substring(0, 22) + "..." : url;
-    }
-  };
-
-  const mediumShortenUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      let path = urlObj.pathname;
-      if (path.length > 15) {
-        path = path.substring(0, 12) + "...";
-      }
-      return urlObj.hostname + path;
-    } catch {
-      return url.length > 40 ? url.substring(0, 37) + "..." : url;
-    }
-  };
-
   return (
     <div
       ref={setNodeRef}
@@ -63,7 +42,7 @@ const LinkItem = ({
           : "0 2px 4px var(--color-shadow)",
       }}
     >
-      <div className="flex items-center w-full sm:w-auto">
+      <div className="flex items-center w-full sm:flex-1 min-w-0">
         <div
           {...attributes}
           {...listeners}
