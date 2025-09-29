@@ -4,7 +4,7 @@ import { db } from "../../firebase";
 
 export const incrementProfileView = createAsyncThunk(
   "stats/incrementProfileView",
-  async ({ userId, username }, { rejectWithValue, dispatch }) => {
+  async ({ userId }, { rejectWithValue, dispatch }) => {
     try {
       const userRef = doc(db, "users", userId);
 
