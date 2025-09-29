@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { doc, updateDoc, increment } from "firebase/firestore";
-import { db } from "../firebase";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearPublicProfile,
@@ -59,7 +57,6 @@ const PublicProfile = () => {
       dispatch(fetchProfileByUsername(username));
     }
 
-    // Cleanup
     return () => {
       dispatch(clearPublicProfile());
     };
@@ -76,7 +73,6 @@ const PublicProfile = () => {
       );
     }
 
-    // Cleanup
     return () => {
       dispatch(clearLinks());
     };
@@ -177,7 +173,6 @@ const PublicProfile = () => {
               )}
             </div>
 
-            {/* Alt not */}
             <div className="mt-8 text-xs text-center text-[color:var(--color-light-text)]">
               <p>
                 {publicProfile.username}'in profil sayfası • IyiLink ile

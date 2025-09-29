@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchLinks,
   createLink,
   deleteLinkById,
   updateLinkById,
@@ -12,7 +11,6 @@ import {
   startEditingLink,
   stopEditingLink,
   updateEditingLinkField,
-  migrateLinksOrder,
   setLinks,
 } from "../../redux/slices/linksSlice";
 
@@ -91,7 +89,9 @@ const LinksManager = ({ getIconComponent }) => {
 
       await dispatch(createLink({ userId: profile.uid, linkData })).unwrap();
       dispatch(resetNewLink());
-    } catch (error) {}
+    } catch (error) {
+      showSuccessToast("Bağlantı eklenemedidi!", error);
+    }
   };
 
   const handleEditLink = (linkId) => {
