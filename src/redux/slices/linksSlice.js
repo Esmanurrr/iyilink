@@ -419,9 +419,8 @@ export const listenToUserLinks = createAsyncThunk(
     }
 
     const linksCollectionRef = collection(db, "users", userId, "links");
-    const q = query(linksCollectionRef, orderBy("order", "asc")); // Linklerin sırasını korumak için
+    const q = query(linksCollectionRef, orderBy("order", "asc"));
 
-    // onSnapshot bir unsubscriber döndürür. Bu, useEffect cleanup'ında kullanılacak.
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -429,8 +428,8 @@ export const listenToUserLinks = createAsyncThunk(
           id: doc.id,
           ...doc.data(),
         }));
-        // Linkler değiştiğinde Redux state'ini güncelle
-        dispatch(setLinks(updatedLinks)); // <<< YENİ REDUCER'ı dispatch ediyoruz
+
+        dispatch(setLinks(updatedLinks));
       },
       (error) => {
         console.error("Error listening to user links:", error);
@@ -438,13 +437,7 @@ export const listenToUserLinks = createAsyncThunk(
       }
     );
 
-    // Bu thunk, cleanup için unsubscribe fonksiyonunu döndürmelidir.
-    // Ancak createAsyncThunk doğrudan bir cleanup fonksiyonu döndürmez.
-    // Bu yüzden unsubscribe fonksiyonunu LinksManager'da yakalayıp kullanacağız.
-    // Thunk'ın kendisi bir promise döndürdüğü için, burada null dönüyoruz
-    // ve unsubscribe'ı side-effect olarak yönetiyoruz.
-    return unsubscribe; // Bu şekilde unsubscribe'ı döndürmek standart bir kullanım değildir.
-    // Aşağıda LinksManager'da nasıl yöneteceğimizi açıklayacağım.
+    return unsubscribe;
   }
 );
 
@@ -466,7 +459,22 @@ export const linksSlice = createSlice({
   initialState,
   reducers: {
     setLinks: (state, action) => {
-      state.links = action.payload;
+      // Id bazlı deduplikasyon ve stabil sıralama
+      const seen = new Set();
+      const unique = [];
+      for (const item of action.payload || []) {
+        if (!item || !item.id) continue;
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          unique.push(item);
+        }
+      }
+      state.links = unique.sort((a, b) => {
+        const ao = a.order ?? 0;
+        const bo = b.order ?? 0;
+        if (ao !== bo) return ao - bo;
+        return String(a.id).localeCompare(String(b.id));
+      });
     },
     clearLinks: (state) => {
       state.links = [];
@@ -525,14 +533,8 @@ export const linksSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLinks.fulfilled, (state, action) => {
+      .addCase(fetchLinks.fulfilled, (state) => {
         state.loading = false;
-        // state.links = action.payload.sort((a, b) => {
-        //   if (a.order !== undefined && b.order !== undefined) {
-        //     return a.order - b.order;
-        //   }
-        //   return new Date(a.createdAt) - new Date(b.createdAt);
-        // });
       })
       .addCase(fetchLinks.rejected, (state, action) => {
         state.loading = false;
@@ -623,7 +625,10 @@ export const linksSlice = createSlice({
       })
       .addCase(createLink.fulfilled, (state, action) => {
         state.loading = false;
-        state.links.push(action.payload);
+        const exists = state.links.some((l) => l.id === action.payload.id);
+        if (!exists) {
+          state.links.push(action.payload);
+        }
         state.isAddingLink = false;
         state.newLink = { title: "", url: "", icon: "link" };
       })
